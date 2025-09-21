@@ -1,0 +1,543 @@
+definitions:
+  main.Error:
+    properties:
+      message:
+        type: string
+    type: object
+  main.Program:
+    properties:
+      confirmedby:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+      wasconfirmed:
+        type: string
+    type: object
+  main.User:
+    properties:
+      age:
+        type: integer
+      login:
+        type: string
+      name:
+        type: string
+      surname:
+        type: string
+    type: object
+host: localhost:8083
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Симакин К.С. Акчурин А.Р. Gateway
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "2.0"
+paths:
+  /gateway/programs:
+    delete:
+      description: Удаляет все программы тренировок из списка
+      responses:
+        "200":
+          description: Успешно удалены
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Удалить все программы тренировок
+      tags:
+      - Программы тренировок
+    get:
+      description: Возвращает список программ
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно получены все программы тренировок
+          schema:
+            $ref: '#/definitions/main.Program'
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/main.Error'
+        "421":
+          description: Не удалось перенаправить запрос
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Получить все программы тренировок
+      tags:
+      - Программы тренировок
+  /gateway/programs/:
+    delete:
+      description: Удаляет программу тренировок из списка
+      parameters:
+      - description: Идентификатор удаляемой программы
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно удалена
+        "400":
+          description: Ошибки в передаваемых параметрах
+          schema:
+            $ref: '#/definitions/main.Error'
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/main.Error'
+        "404":
+          description: Нет элемента с указанным идентификатором
+          schema:
+            $ref: '#/definitions/main.Error'
+        "405":
+          description: Неверный метод
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Удалить программу тренировок
+      tags:
+      - Программы тренировок
+    get:
+      description: Возвращает программу тренировок по индексу
+      parameters:
+      - description: Идентификатор программы
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно получена программа тренировок
+          schema:
+            $ref: '#/definitions/main.Program'
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/main.Error'
+        "404":
+          description: Нет элемента с указанным идентификатором
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Получить программу тренировок
+      tags:
+      - Программы тренировок
+    patch:
+      description: Возвращает программу тренировок по индексу
+      parameters:
+      - description: Идентификатор обновляемой программы
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: Название программы
+        in: formData
+        name: Name
+        type: string
+      - description: Описание программы
+        in: formData
+        name: Description
+        type: string
+      - description: Стоимость программы
+        in: formData
+        name: Price
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно обновлена
+        "400":
+          description: Неверное значение цены
+          schema:
+            $ref: '#/definitions/main.Error'
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/main.Error'
+        "404":
+          description: Нет элемента с таким идентификатором
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Обновить программу тренировок
+      tags:
+      - Программы тренировок
+    post:
+      description: Добавляет в список тренировок новую программу
+      parameters:
+      - description: Название программы
+        in: formData
+        name: Name
+        required: true
+        type: string
+      - description: Описание программы
+        in: formData
+        name: Description
+        required: true
+        type: string
+      - description: Стоимость программы
+        in: formData
+        name: Price
+        required: true
+        type: integer
+      - description: Id подтверждающего пользователя
+        in: formData
+        name: ConfirmUserId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно добавлена
+        "400":
+          description: Ошибки в передаваемых параметрах
+          schema:
+            $ref: '#/definitions/main.Error'
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/main.Error'
+        "405":
+          description: Неверный метод
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Добавить новую программу тренировок
+      tags:
+      - Программы тренировок
+  /gateway/programs/count:
+    get:
+      description: Возвращает кол-во документов
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Кол-во элементов
+          schema:
+            type: integer
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Получить кол-во программ
+      tags:
+      - Программы тренировок
+  /gateway/users:
+    delete:
+      description: Удаляет всех пользователей из списка
+      responses:
+        "200":
+          description: Успешно удален
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Удалить всех пользователей
+      tags:
+      - Пользователи
+    get:
+      description: Возвращает список пользователей
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно получены все пользователи
+          schema:
+            $ref: '#/definitions/main.User'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Получить всех пользователей
+      tags:
+      - Пользователи
+  /gateway/users/:
+    delete:
+      description: Удаляет пользователя из списка
+      parameters:
+      - description: Идентификатор удаляемого пользователя
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешн удален
+        "400":
+          description: Ошибки в передаваемых параметрах
+          schema:
+            $ref: '#/definitions/main.Error'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/main.Error'
+        "404":
+          description: Нет элемента с указанным идентификатором
+          schema:
+            $ref: '#/definitions/main.Error'
+        "405":
+          description: Неверный метод
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Удалить пользователя
+      tags:
+      - Пользователи
+    get:
+      description: Возвращает пользователя по индексу
+      parameters:
+      - description: Идентификатор пользователя
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно получен пользователь
+          schema:
+            $ref: '#/definitions/main.User'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/main.Error'
+        "404":
+          description: Нет элемента с указанным идентификатором
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Получить пользователя
+      tags:
+      - Пользователи
+    patch:
+      description: Обновляет информацию о пользователе
+      parameters:
+      - description: Идентификатор обновляемого пользователя
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: Имя
+        in: formData
+        name: Name
+        type: string
+      - description: Фамилия
+        in: formData
+        name: Surname
+        type: string
+      - description: Возраст
+        in: formData
+        name: Age
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно обновлена
+        "400":
+          description: Неверное значение
+          schema:
+            $ref: '#/definitions/main.Error'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/main.Error'
+        "404":
+          description: Нет элемента с таким идентификатором
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Обновить пользователя
+      tags:
+      - Пользователи
+    post:
+      description: Добавляет в список пользователей нового
+      parameters:
+      - description: Имя
+        in: formData
+        name: Name
+        required: true
+        type: string
+      - description: Фамилия
+        in: formData
+        name: Surname
+        required: true
+        type: string
+      - description: Логин
+        in: formData
+        name: login
+        required: true
+        type: string
+      - description: Возвраст
+        in: formData
+        name: Age
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно добавлен
+        "400":
+          description: Ошибки в передаваемых параметрах
+          schema:
+            $ref: '#/definitions/main.Error'
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/main.Error'
+        "405":
+          description: Неверный метод
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Добавить нового пользователя
+      tags:
+      - Пользователи
+  /gateway/users/count:
+    get:
+      description: Возвращает кол-во пользователей
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Кол-во элементов
+          schema:
+            type: integer
+        "401":
+          description: Не авторизован
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - BearerAuth: []
+      summary: Получить кол-во пользователей
+      tags:
+      - Пользователи
+  /login:
+    get:
+      description: Аутентифицирует пользователя
+      parameters:
+      - description: Логин
+        in: query
+        name: login
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT-токен
+          schema:
+            type: string
+        "400":
+          description: Некорректный запрос
+          schema:
+            $ref: '#/definitions/main.Error'
+        "405":
+          description: Неверный метод
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Залогиниться
+      tags:
+      - Аутентификация
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

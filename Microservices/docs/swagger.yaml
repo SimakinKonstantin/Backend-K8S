@@ -1,0 +1,222 @@
+definitions:
+  main.Error:
+    properties:
+      message:
+        type: string
+    type: object
+  main.Program:
+    properties:
+      confirmedby:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+      wasconfirmed:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Симакин К.С. Акчурин А.Р.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "2.0"
+paths:
+  /programs:
+    delete:
+      description: Удаляет все программы тренировок из списка
+      responses:
+        "200":
+          description: Успешно удалены
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Удалить все программы тренировок
+      tags:
+      - Программы тренировок
+    get:
+      description: Возвращает список программ
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно получены все программы тренировок
+          schema:
+            $ref: '#/definitions/main.Program'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Получить все программы тренировок
+      tags:
+      - Программы тренировок
+  /programs/:
+    delete:
+      description: Удаляет программу тренировок из списка
+      parameters:
+      - description: Идентификатор удаляемой программы
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно удалена
+        "400":
+          description: Ошибки в передаваемых параметрах
+          schema:
+            $ref: '#/definitions/main.Error'
+        "404":
+          description: Нет элемента с указанным идентификатором
+          schema:
+            $ref: '#/definitions/main.Error'
+        "405":
+          description: Неверный метод
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Удалить программу тренировок
+      tags:
+      - Программы тренировок
+    get:
+      description: Возвращает программу тренировок по индексу
+      parameters:
+      - description: Идентификатор программы
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно получена программа тренировок
+          schema:
+            $ref: '#/definitions/main.Program'
+        "404":
+          description: Нет элемента с указанным идентификатором
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Получить программу тренировок
+      tags:
+      - Программы тренировок
+    patch:
+      description: Возвращает программу тренировок по индексу
+      parameters:
+      - description: Идентификатор обновляемой программы
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: Название программы
+        in: formData
+        name: Name
+        type: string
+      - description: Описание программы
+        in: formData
+        name: Description
+        type: string
+      - description: Стоимость программы
+        in: formData
+        name: Price
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно обновлена
+        "400":
+          description: Неверное значение цены
+          schema:
+            $ref: '#/definitions/main.Error'
+        "404":
+          description: Нет элемента с таким идентификатором
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Обновить программу тренировок
+      tags:
+      - Программы тренировок
+    post:
+      description: Добавляет в список тренировок новую программу
+      parameters:
+      - description: Название программы
+        in: formData
+        name: Name
+        required: true
+        type: string
+      - description: Описание программы
+        in: formData
+        name: Description
+        required: true
+        type: string
+      - description: Стоимость программы
+        in: formData
+        name: Price
+        required: true
+        type: integer
+      - description: Id подтверждающего пользователя
+        in: formData
+        name: ConfirmUserId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно добавлена
+        "400":
+          description: Ошибки в передаваемых параметрах
+          schema:
+            $ref: '#/definitions/main.Error'
+        "405":
+          description: Неверный метод
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Добавить новую программу тренировок
+      tags:
+      - Программы тренировок
+  /programs/count:
+    get:
+      description: Возвращает кол-во документов
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Кол-во элементов
+          schema:
+            type: integer
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Получить кол-во программ
+      tags:
+      - Программы тренировок
+swagger: "2.0"

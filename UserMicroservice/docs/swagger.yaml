@@ -1,0 +1,239 @@
+definitions:
+  main.AppError:
+    type: object
+  main.User:
+    properties:
+      age:
+        type: integer
+      login:
+        type: string
+      name:
+        type: string
+      surname:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Симакин К.С. Акчурин А.Р.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "2.0"
+paths:
+  /users:
+    delete:
+      description: Удаляет всех пользователей из списка
+      responses:
+        "200":
+          description: Успешно удален
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.AppError'
+      summary: Удалить всех пользователей
+      tags:
+      - Пользователи
+    get:
+      description: Возвращает список пользователей
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно получены все пользователи
+          schema:
+            $ref: '#/definitions/main.User'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.AppError'
+      summary: Получить всех пользователей
+      tags:
+      - Пользователи
+  /users/:
+    delete:
+      description: Удаляет пользователя из списка
+      parameters:
+      - description: Идентификатор удаляемого пользователя
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешн удален
+        "400":
+          description: Ошибки в передаваемых параметрах
+          schema:
+            $ref: '#/definitions/main.AppError'
+        "404":
+          description: Нет элемента с указанным идентификатором
+          schema:
+            $ref: '#/definitions/main.AppError'
+        "405":
+          description: Неверный метод
+          schema:
+            $ref: '#/definitions/main.AppError'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.AppError'
+      summary: Удалить пользователя
+      tags:
+      - Пользователи
+    get:
+      description: Возвращает пользователя по индексу
+      parameters:
+      - description: Идентификатор пользователя
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно получен пользователь
+          schema:
+            $ref: '#/definitions/main.User'
+        "404":
+          description: Нет элемента с указанным идентификатором
+          schema:
+            $ref: '#/definitions/main.AppError'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.AppError'
+      summary: Получить пользователя
+      tags:
+      - Пользователи
+    patch:
+      description: Обновляет информацию о пользователе
+      parameters:
+      - description: Идентификатор обновляемого пользователя
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: Имя
+        in: formData
+        name: Name
+        type: string
+      - description: Фамилия
+        in: formData
+        name: Surname
+        type: string
+      - description: Возраст
+        in: formData
+        name: Age
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно обновлена
+        "400":
+          description: Неверное значение
+          schema:
+            $ref: '#/definitions/main.AppError'
+        "404":
+          description: Нет элемента с таким идентификатором
+          schema:
+            $ref: '#/definitions/main.AppError'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.AppError'
+      summary: Обновить пользователя
+      tags:
+      - Пользователи
+    post:
+      description: Добавляет в список пользователей нового
+      parameters:
+      - description: Имя
+        in: formData
+        name: Name
+        required: true
+        type: string
+      - description: Фамилия
+        in: formData
+        name: Surname
+        required: true
+        type: string
+      - description: Логин
+        in: formData
+        name: login
+        required: true
+        type: string
+      - description: Возвраст
+        in: formData
+        name: Age
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно добавлен
+        "400":
+          description: Ошибки в передаваемых параметрах
+          schema:
+            $ref: '#/definitions/main.AppError'
+        "405":
+          description: Неверный метод
+          schema:
+            $ref: '#/definitions/main.AppError'
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.AppError'
+      summary: Добавить нового пользователя
+      tags:
+      - Пользователи
+  /users/count:
+    get:
+      description: Возвращает кол-во пользователей
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Кол-во элементов
+          schema:
+            type: integer
+        "422":
+          description: Неподдерживаемые данные
+          schema:
+            $ref: '#/definitions/main.AppError'
+      summary: Получить кол-во пользователей
+      tags:
+      - Пользователи
+  /users/validness:
+    get:
+      description: Возвращает 200, или 404
+      parameters:
+      - description: Логин пользователя
+        in: query
+        name: login
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Данный пользователь существует
+        "404":
+          description: Нет элемента с указанным логином
+      summary: Проверить наличие пользователя
+      tags:
+      - Пользователи
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

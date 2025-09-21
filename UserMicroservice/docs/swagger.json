@@ -1,0 +1,358 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Симакин К.С. Акчурин А.Р.",
+        "title": "Swagger Example API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "2.0"
+    },
+    "host": "localhost:8080",
+    "paths": {
+        "/users": {
+            "get": {
+                "description": "Возвращает список пользователей",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Пользователи"
+                ],
+                "summary": "Получить всех пользователей",
+                "responses": {
+                    "200": {
+                        "description": "Успешно получены все пользователи",
+                        "schema": {
+                            "$ref": "#/definitions/main.User"
+                        }
+                    },
+                    "422": {
+                        "description": "Неподдерживаемые данные",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет всех пользователей из списка",
+                "tags": [
+                    "Пользователи"
+                ],
+                "summary": "Удалить всех пользователей",
+                "responses": {
+                    "200": {
+                        "description": "Успешно удален"
+                    },
+                    "422": {
+                        "description": "Неподдерживаемые данные",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/": {
+            "get": {
+                "description": "Возвращает пользователя по индексу",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Пользователи"
+                ],
+                "summary": "Получить пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Идентификатор пользователя",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешно получен пользователь",
+                        "schema": {
+                            "$ref": "#/definitions/main.User"
+                        }
+                    },
+                    "404": {
+                        "description": "Нет элемента с указанным идентификатором",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    },
+                    "422": {
+                        "description": "Неподдерживаемые данные",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Добавляет в список пользователей нового",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Пользователи"
+                ],
+                "summary": "Добавить нового пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Имя",
+                        "name": "Name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фамилия",
+                        "name": "Surname",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Логин",
+                        "name": "login",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Возвраст",
+                        "name": "Age",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешно добавлен"
+                    },
+                    "400": {
+                        "description": "Ошибки в передаваемых параметрах",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    },
+                    "405": {
+                        "description": "Неверный метод",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    },
+                    "422": {
+                        "description": "Неподдерживаемые данные",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет пользователя из списка",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Пользователи"
+                ],
+                "summary": "Удалить пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Идентификатор удаляемого пользователя",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешн удален"
+                    },
+                    "400": {
+                        "description": "Ошибки в передаваемых параметрах",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Нет элемента с указанным идентификатором",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    },
+                    "405": {
+                        "description": "Неверный метод",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    },
+                    "422": {
+                        "description": "Неподдерживаемые данные",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Обновляет информацию о пользователе",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Пользователи"
+                ],
+                "summary": "Обновить пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Идентификатор обновляемого пользователя",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Имя",
+                        "name": "Name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фамилия",
+                        "name": "Surname",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Возраст",
+                        "name": "Age",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешно обновлена"
+                    },
+                    "400": {
+                        "description": "Неверное значение",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Нет элемента с таким идентификатором",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    },
+                    "422": {
+                        "description": "Неподдерживаемые данные",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/count": {
+            "get": {
+                "description": "Возвращает кол-во пользователей",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Пользователи"
+                ],
+                "summary": "Получить кол-во пользователей",
+                "responses": {
+                    "200": {
+                        "description": "Кол-во элементов",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "422": {
+                        "description": "Неподдерживаемые данные",
+                        "schema": {
+                            "$ref": "#/definitions/main.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/validness": {
+            "get": {
+                "description": "Возвращает 200, или 404",
+                "tags": [
+                    "Пользователи"
+                ],
+                "summary": "Проверить наличие пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Логин пользователя",
+                        "name": "login",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данный пользователь существует"
+                    },
+                    "404": {
+                        "description": "Нет элемента с указанным логином"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.AppError": {
+            "type": "object"
+        },
+        "main.User": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

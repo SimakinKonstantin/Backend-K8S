@@ -19,7 +19,7 @@ import (
 )
 
 type App struct {
-	Database *dbProcessor
+	Database *DbProcessor
 	Redis    *redis.Client
 	Producer *kafka.Writer
 }

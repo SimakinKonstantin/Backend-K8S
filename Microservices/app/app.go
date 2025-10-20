@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"context"
@@ -11,7 +11,9 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"lab1/db"
 	"lab1/metrics"
+	"lab1/models"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -19,7 +21,7 @@ import (
 )
 
 type App struct {
-	Database *DbProcessor
+	Database *db.Processor
 	Redis    *redis.Client
 	Producer *kafka.Writer
 }
@@ -31,7 +33,7 @@ type App struct {
 // @Success        200 {object} Program  "Успешно получены все программы тренировок"
 // @Failure        422 {object} Error "Неподдерживаемые данные"
 // @Router         /programs [get]
-func (app *App) showAllHandler(w http.ResponseWriter, r *http.Request) {
+func (app *App) ShowAllHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	statusCode := http.StatusOK
 
@@ -43,12 +45,12 @@ func (app *App) showAllHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 
-	allPrograms, err := app.Database.getAllPrograms()
+	allPrograms, err := app.Database.GetAllPrograms()
 	if err != nil {
 		metrics.ErrorMetrics.Inc()
 		statusCode = http.StatusUnprocessableEntity
 		w.WriteHeader(statusCode)
-		json.NewEncoder(w).Encode(Error{"неподдерживаемые данные"})
+		json.NewEncoder(w).Encode(models.Error{"неподдерживаемые данные"})
 		return
 	}
 	json.NewEncoder(w).Encode(allPrograms)
@@ -63,7 +65,7 @@ func (app *App) showAllHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure        404 {object} Error "Нет элемента с указанным идентификатором"
 // @Failure        422 {object} Error "Неподдерживаемые данные
 // @Router         /programs/ [get]
-func (app *App) showHandler(w http.ResponseWriter, r *http.Request) {
+func (app *App) ShowHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	statusCode := http.StatusOK
 
@@ -83,32 +85,32 @@ func (app *App) showHandler(w http.ResponseWriter, r *http.Request) {
 		slog.Info("Получили программу их кеша")
 
 		// Нашлось в кеше. Оно хранится там в виде строки.
-		var p CachedProgram
+		var p models.CachedProgram
 		json.Unmarshal([]byte(unmarshalledProgram), &p)
 		json.NewEncoder(w).Encode(p)
 		return
 
 	} else {
-		program, err := app.Database.getProgram(index)
+		program, err := app.Database.GetProgram(index)
 		if err != nil {
 			if errors.Is(err, mongo.ErrNoDocuments) {
 				statusCode = http.StatusNotFound
 				w.WriteHeader(statusCode)
 				metrics.ErrorMetrics.Inc()
-				json.NewEncoder(w).Encode(Error{fmt.Sprintf("нет элемента с указанным id = %s", index)})
+				json.NewEncoder(w).Encode(models.Error{fmt.Sprintf("нет элемента с указанным id = %s", index)})
 
 			} else {
 				statusCode = http.StatusUnprocessableEntity
 				w.WriteHeader(statusCode)
 				metrics.ErrorMetrics.Inc()
-				json.NewEncoder(w).Encode(Error{"неподдерживаемые данные"})
+				json.NewEncoder(w).Encode(models.Error{"неподдерживаемые данные"})
 			}
 			return
 		}
 
 		// Положили в кеш.
 		marshalled_bson, _ := bson.Marshal(program)
-		var p CachedProgram
+		var p models.CachedProgram
 		bson.Unmarshal(marshalled_bson, &p)
 		_, err = app.Redis.Set(context.TODO(), index, p, 5*time.Minute).Result()
 		if err != nil {
@@ -132,7 +134,7 @@ func (app *App) showHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure        404 {object} Error "Нет элемента с таким идентификатором"
 // @Failure        422 {object} Error "Неподдерживаемые данные"
 // @Router         /programs/ [patch]
-func (app *App) updateHandler(w http.ResponseWriter, r *http.Request) {
+func (app *App) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	statusCode := http.StatusOK
 
@@ -147,7 +149,7 @@ func (app *App) updateHandler(w http.ResponseWriter, r *http.Request) {
 		statusCode = http.StatusMethodNotAllowed
 		w.WriteHeader(statusCode)
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{"используется неверный метод"})
+		json.NewEncoder(w).Encode(models.Error{"используется неверный метод"})
 		return
 	}
 	index := r.URL.Query().Get("id")
@@ -156,7 +158,7 @@ func (app *App) updateHandler(w http.ResponseWriter, r *http.Request) {
 		statusCode = http.StatusBadRequest
 		w.WriteHeader(statusCode)
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{"неверные аргументы ParseForm"})
+		json.NewEncoder(w).Encode(models.Error{"неверные аргументы ParseForm"})
 		return
 	}
 	new_name := r.PostForm.Get("Name")
@@ -182,7 +184,7 @@ func (app *App) updateHandler(w http.ResponseWriter, r *http.Request) {
 			statusCode = http.StatusBadRequest
 			w.WriteHeader(statusCode)
 			metrics.ErrorMetrics.Inc()
-			json.NewEncoder(w).Encode(Error{"неверные аргументы price"})
+			json.NewEncoder(w).Encode(models.Error{"неверные аргументы price"})
 			return
 		}
 		newValues = append(newValues, bson.E{"price", new_price_int})
@@ -192,19 +194,19 @@ func (app *App) updateHandler(w http.ResponseWriter, r *http.Request) {
 	app.Redis.Del(context.TODO(), index)
 
 	// Обновление в БД.
-	err := app.Database.updateProgram(index, newValues)
+	err := app.Database.UpdateProgram(index, newValues)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			statusCode = http.StatusNotFound
 			w.WriteHeader(statusCode)
 			metrics.ErrorMetrics.Inc()
-			json.NewEncoder(w).Encode(Error{"нет элемента с указанным идентификатором"})
+			json.NewEncoder(w).Encode(models.Error{"нет элемента с указанным идентификатором"})
 
 		} else {
 			statusCode = http.StatusUnprocessableEntity
 			w.WriteHeader(statusCode)
 			metrics.ErrorMetrics.Inc()
-			json.NewEncoder(w).Encode(Error{"неподдерживаемые данные"})
+			json.NewEncoder(w).Encode(models.Error{"неподдерживаемые данные"})
 		}
 		return
 	}
@@ -225,7 +227,7 @@ func (app *App) updateHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure        405 {object} Error "Неверный метод"
 // @Failure        422 {object} Error "Неподдерживаемые данные"
 // @Router         /programs/ [post]
-func (app *App) createHandler(w http.ResponseWriter, r *http.Request) {
+func (app *App) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	statusCode := http.StatusOK
 
@@ -237,14 +239,14 @@ func (app *App) createHandler(w http.ResponseWriter, r *http.Request) {
 		statusCode = http.StatusMethodNotAllowed
 		w.WriteHeader(statusCode)
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{"используется неверный метод"})
+		json.NewEncoder(w).Encode(models.Error{"используется неверный метод"})
 		return
 	}
 	if r.ParseForm() != nil {
 		statusCode = http.StatusBadRequest
 		w.WriteHeader(statusCode)
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{"неверные аргументы при парсинге"})
+		json.NewEncoder(w).Encode(models.Error{"неверные аргументы при парсинге"})
 		return
 	}
 
@@ -253,7 +255,7 @@ func (app *App) createHandler(w http.ResponseWriter, r *http.Request) {
 		statusCode = http.StatusBadRequest
 		w.WriteHeader(statusCode)
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{fmt.Sprintf("неверные аргументы: Price: %s"+
+		json.NewEncoder(w).Encode(models.Error{fmt.Sprintf("неверные аргументы: Price: %s"+
 			"", r.PostForm.Get("Price"))})
 		return
 	}
@@ -263,23 +265,23 @@ func (app *App) createHandler(w http.ResponseWriter, r *http.Request) {
 		statusCode = http.StatusBadRequest
 		w.WriteHeader(statusCode)
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{"некорректный id подтверждающего пользователя"})
+		json.NewEncoder(w).Encode(models.Error{"некорректный id подтверждающего пользователя"})
 		return
 	}
 
-	newProgram := Program{
+	newProgram := models.Program{
 		r.PostForm.Get("Name"),
 		r.PostForm.Get("Description"),
 		price,
 		"-",
 		confirmedUserId,
 	}
-	insertedId, err := app.Database.addProgram(&newProgram)
+	insertedId, err := app.Database.AddProgram(&newProgram)
 	if err != nil {
 		statusCode = http.StatusUnprocessableEntity
 		w.WriteHeader(statusCode)
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{"неподдерживаемые данные"})
+		json.NewEncoder(w).Encode(models.Error{"неподдерживаемые данные"})
 		return
 	}
 
@@ -288,7 +290,7 @@ func (app *App) createHandler(w http.ResponseWriter, r *http.Request) {
 		statusCode = http.StatusUnprocessableEntity
 		w.WriteHeader(statusCode)
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{"при добавлении новой программы сгенерированное id не типа ObjectID"})
+		json.NewEncoder(w).Encode(models.Error{"при добавлении новой программы сгенерированное id не типа ObjectID"})
 		return
 	}
 
@@ -297,7 +299,7 @@ func (app *App) createHandler(w http.ResponseWriter, r *http.Request) {
 		statusCode = http.StatusUnprocessableEntity
 		w.WriteHeader(statusCode)
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{"ошибка при записи в очередь " + err.Error()})
+		json.NewEncoder(w).Encode(models.Error{"ошибка при записи в очередь " + err.Error()})
 		return
 	}
 
@@ -317,7 +319,7 @@ func (app *App) createHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure        405 {object} Error "Неверный метод"
 // @Failure        422 {object} Error "Неподдерживаемые данные"
 // @Router         /programs/ [delete]
-func (app *App) deleteHandler(w http.ResponseWriter, r *http.Request) {
+func (app *App) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	statusCode := http.StatusOK
 
@@ -329,7 +331,7 @@ func (app *App) deleteHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		statusCode = http.StatusMethodNotAllowed
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{"используется неверный метод"})
+		json.NewEncoder(w).Encode(models.Error{"используется неверный метод"})
 		return
 	}
 
@@ -338,20 +340,20 @@ func (app *App) deleteHandler(w http.ResponseWriter, r *http.Request) {
 	// Удаление из кеша.
 	app.Redis.Del(context.TODO(), id)
 
-	err := app.Database.deleteProgram(id)
+	err := app.Database.DeleteProgram(id)
 
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			statusCode = http.StatusNotFound
 			w.WriteHeader(statusCode)
 			metrics.ErrorMetrics.Inc()
-			json.NewEncoder(w).Encode(Error{"нет элемента с указанным идентификатором"})
+			json.NewEncoder(w).Encode(models.Error{"нет элемента с указанным идентификатором"})
 
 		} else {
 			statusCode = http.StatusUnprocessableEntity
 			w.WriteHeader(statusCode)
 			metrics.ErrorMetrics.Inc()
-			json.NewEncoder(w).Encode(Error{"неподдерживаемые данные"})
+			json.NewEncoder(w).Encode(models.Error{"неподдерживаемые данные"})
 		}
 		return
 	}
@@ -366,7 +368,7 @@ func (app *App) deleteHandler(w http.ResponseWriter, r *http.Request) {
 // @Success        200 "Успешно удалены"
 // @Failure        422 {object} Error "Неподдерживаемые данные"
 // @Router         /programs [delete]
-func (app *App) deleteAllHandler(w http.ResponseWriter, r *http.Request) {
+func (app *App) DeleteAllHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	statusCode := http.StatusOK
 
@@ -374,12 +376,12 @@ func (app *App) deleteAllHandler(w http.ResponseWriter, r *http.Request) {
 		metrics.ObserveRequest(time.Since(start), statusCode)
 	}()
 
-	err := app.Database.deleteAllPrograms()
+	err := app.Database.DeleteAllPrograms()
 	if err != nil {
 		statusCode = http.StatusUnprocessableEntity
 		w.WriteHeader(statusCode)
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{"неподдерживаемые данные"})
+		json.NewEncoder(w).Encode(models.Error{"неподдерживаемые данные"})
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -393,7 +395,7 @@ func (app *App) deleteAllHandler(w http.ResponseWriter, r *http.Request) {
 // @Success        200 {integer} int "Кол-во элементов"
 // @Failure        422 {object} Error "Неподдерживаемые данные"
 // @Router         /programs/count [get]
-func (app *App) getCount(w http.ResponseWriter, r *http.Request) {
+func (app *App) GetCount(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	statusCode := http.StatusOK
 
@@ -402,12 +404,12 @@ func (app *App) getCount(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	w.Header().Set("Content-Type", "text/plain")
-	count, err := app.Database.countPrograms()
+	count, err := app.Database.CountPrograms()
 	if err != nil {
 		statusCode = http.StatusNotFound
 		w.WriteHeader(statusCode)
 		metrics.ErrorMetrics.Inc()
-		json.NewEncoder(w).Encode(Error{"неподдерживаемые данные"})
+		json.NewEncoder(w).Encode(models.Error{"неподдерживаемые данные"})
 		return
 	}
 	w.WriteHeader(statusCode)
@@ -427,15 +429,15 @@ func (app App) UpdateStatus(programId bson.ObjectID, newStatus string) error {
 	return nil
 }
 
-func (app *App) routes() *http.ServeMux {
+func (app *App) Routes() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /programs", app.showAllHandler)
-	mux.HandleFunc("GET /programs/", app.showHandler)
-	mux.HandleFunc("PATCH /programs/", app.updateHandler)
-	mux.HandleFunc("POST /programs/", app.createHandler)
-	mux.HandleFunc("DELETE /programs/", app.deleteHandler)
-	mux.HandleFunc("DELETE /programs", app.deleteAllHandler)
-	mux.HandleFunc("GET /programs/count", app.getCount)
+	mux.HandleFunc("GET /programs", app.ShowAllHandler)
+	mux.HandleFunc("GET /programs/", app.ShowHandler)
+	mux.HandleFunc("PATCH /programs/", app.UpdateHandler)
+	mux.HandleFunc("POST /programs/", app.CreateHandler)
+	mux.HandleFunc("DELETE /programs/", app.DeleteHandler)
+	mux.HandleFunc("DELETE /programs", app.DeleteAllHandler)
+	mux.HandleFunc("GET /programs/count", app.GetCount)
 	mux.HandleFunc("/swagger/", httpSwagger.Handler(httpSwagger.URL("http://localhost:8081/swagger/doc.json")))
 	mux.Handle("/metrics", promhttp.Handler())
 	return mux

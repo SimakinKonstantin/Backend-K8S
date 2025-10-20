@@ -1,11 +1,10 @@
-package broker
+package app
 
 import (
 	"context"
 	"fmt"
 	"github.com/segmentio/kafka-go"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"lab1/app"
 	"log/slog"
 )
 
@@ -19,7 +18,7 @@ func Write(producer *kafka.Writer, objectId string, userId string) error {
 	})
 }
 
-func Listen(consumer *kafka.Reader, app *app.App) {
+func Listen(consumer *kafka.Reader, app *App) {
 	for {
 		msg, err := consumer.ReadMessage(context.TODO())
 

@@ -17,6 +17,10 @@ WORKDIR /root/
 
 COPY --from=builder /app/main .
 
+# Основная программа
 EXPOSE 8081
+
+# GraphQL сервер
+EXPOSE 8010
 
 CMD ["./main"]

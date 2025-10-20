@@ -19,6 +19,7 @@ services:
       context: ./Microservices
     ports:
       - "8081:8081"
+      - "8010:8010"
     depends_on:
       kafka:
         condition: service_healthy
@@ -51,7 +52,7 @@ services:
       - KAFKA=kafka:9092
 
   kafka:
-    image: bitnami/kafka:3.9.0
+    image: bitnamilegacy/kafka:3.9.0
     ports:
       - "9092:9092"
       - "9093:9093"

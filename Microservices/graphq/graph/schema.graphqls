@@ -1,0 +1,43 @@
+type Program {
+  confirmedby: String!
+  description: String!
+  name: String!
+  price: Int!
+  wasconfirmed: String!
+}
+
+input CreateProgramInput {
+  name: String!
+  description: String!
+  price: Int!
+  confirmuserid: String!
+}
+
+input UpdateProgramInput {
+  id: String!
+  name: Int
+  description: Int
+  price: Int
+}
+
+input ProgramFilterInput {
+  confirmedby: String
+  description: String
+  name: String
+  price: Int
+  wasconfirmed: String
+}
+
+type Query {
+  allPrograms: [Program!]!
+  program(id: String!): Program!
+  programsCount: Int!
+  programFilter(filter: ProgramFilterInput!): [Program!]!
+}
+
+type Mutation {
+  deleteAllPrograms: Boolean!
+  deleteProgram(id: String!): Boolean!
+  addProgram(val: CreateProgramInput!): Program!
+  updateProgram(val: UpdateProgramInput!): Boolean!
+}

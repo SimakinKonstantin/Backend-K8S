@@ -16,6 +16,20 @@ func ObserveRequest(d time.Duration, statusCode int) {
 	requestMetrics.WithLabelValues(strconv.Itoa(statusCode)).Observe(d.Seconds())
 }
 
+const (
+	GQLSuccess = "success"
+	GQLError   = "error"
+)
+
+var requestMetricsGQL = promauto.NewSummaryVec(prometheus.SummaryOpts{
+	Namespace: "microservice",
+	Name:      "gql request",
+}, []string{"status"})
+
+func ObserveRequestGQL(d time.Duration, result string) {
+	requestMetricsGQL.WithLabelValues(result).Observe(d.Seconds())
+}
+
 var ErrorMetrics = promauto.NewCounter(prometheus.CounterOpts{
 	Namespace: "microservice",
 	Name:      "error",

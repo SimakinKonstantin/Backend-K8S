@@ -7,45 +7,76 @@ package graph
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"lab1/app"
-	"lab1/graphq/graph/model"
-	"lab1/models"
-
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"lab1/app"
+	"lab1/graphq/graph/model"
+	"lab1/metrics"
+	"lab1/models"
+	"log/slog"
+	"time"
 )
 
 // DeleteAllPrograms is the resolver for the DeleteAllPrograms field.
 func (r *mutationResolver) DeleteAllPrograms(ctx context.Context) (bool, error) {
+	start := time.Now()
+	res := ""
+
+	defer func() {
+		metrics.ObserveRequestGQL(time.Since(start), res)
+	}()
+
 	err := r.application.Database.DeleteAllPrograms()
 	if err != nil {
+		res = metrics.GQLError
 		return false, gqlerror.Errorf("не удалось удалить элементы: %s", err.Error())
 	}
 
+	res = metrics.GQLSuccess
 	return true, nil
 }
 
 // DeleteProgram is the resolver for the deleteProgram field.
 func (r *mutationResolver) DeleteProgram(ctx context.Context, id string) (bool, error) {
+	start := time.Now()
+	res := ""
+
+	defer func() {
+		metrics.ObserveRequestGQL(time.Since(start), res)
+	}()
+
 	r.application.Redis.Del(context.TODO(), id)
 	err := r.application.Database.DeleteProgram(id)
 
 	if err != nil {
+		res = metrics.GQLError
 		return false, gqlerror.Errorf("не удалось удалить элемент: %s", err.Error())
 	}
 
+	res = metrics.GQLSuccess
 	return true, nil
 }
 
 // AddProgram is the resolver for the addProgram field.
 func (r *mutationResolver) AddProgram(ctx context.Context, val model.CreateProgramInput) (*model.Program, error) {
+	start := time.Now()
+	res := ""
+
+	defer func() {
+		metrics.ObserveRequestGQL(time.Since(start), res)
+	}()
+
 	if val.Price < 0 {
+		res = metrics.GQLError
 		return &model.Program{}, gqlerror.Errorf("неверные аргументы: Price: %d", val.Price)
 	}
 
 	confirmedUserId, err := bson.ObjectIDFromHex(val.Confirmuserid)
 	if err != nil {
+		res = metrics.GQLError
 		return &model.Program{}, gqlerror.Errorf("некорректный id подтверждающего пользователя")
 	}
 
@@ -58,16 +89,19 @@ func (r *mutationResolver) AddProgram(ctx context.Context, val model.CreateProgr
 	}
 	insertedId, err := r.application.Database.AddProgram(&newProgram)
 	if err != nil {
+		res = metrics.GQLError
 		return &model.Program{}, gqlerror.Errorf("не удалось записать в БД")
 	}
 
 	oid, ok := insertedId.InsertedID.(bson.ObjectID)
 	if !ok {
+		res = metrics.GQLError
 		return &model.Program{}, gqlerror.Errorf("при добавлении новой программы сгенерированное id не типа ObjectID")
 	}
 
 	err = app.Write(r.application.Producer, oid.Hex(), confirmedUserId.Hex())
 	if err != nil {
+		res = metrics.GQLError
 		return &model.Program{}, gqlerror.Errorf("ошибка при записи в очередь " + err.Error())
 	}
 
@@ -79,11 +113,19 @@ func (r *mutationResolver) AddProgram(ctx context.Context, val model.CreateProgr
 		Confirmedby:  confirmedUserId.String(),
 	}
 
+	res = metrics.GQLSuccess
 	return &newProgramOutput, nil
 }
 
 // UpdateProgram is the resolver for the updateProgram field.
 func (r *mutationResolver) UpdateProgram(ctx context.Context, val model.UpdateProgramInput) (bool, error) {
+	start := time.Now()
+	res := ""
+
+	defer func() {
+		metrics.ObserveRequestGQL(time.Since(start), res)
+	}()
+
 	new_name := val.Name
 	new_description := val.Description
 	new_price := val.Price
@@ -99,6 +141,7 @@ func (r *mutationResolver) UpdateProgram(ctx context.Context, val model.UpdatePr
 	if new_price != nil {
 		new_price_int := *new_price
 		if new_price_int < 0 {
+			res = metrics.GQLError
 			return false, gqlerror.Errorf("неверное значение price: %d", new_price_int)
 		}
 		newValues = append(newValues, bson.E{"price", new_price_int})
@@ -110,42 +153,135 @@ func (r *mutationResolver) UpdateProgram(ctx context.Context, val model.UpdatePr
 	// Обновление в БД.
 	err := r.application.Database.UpdateProgram(val.ID, newValues)
 	if err != nil {
+		res = metrics.GQLError
 		return false, gqlerror.Errorf("не удалось обновить запись: %s", err.Error())
 	}
 
+	res = metrics.GQLSuccess
 	return true, nil
 }
 
 // AllPrograms is the resolver for the allPrograms field.
 func (r *queryResolver) AllPrograms(ctx context.Context) ([]*model.Program, error) {
-	panic(fmt.Errorf("not implemented: AllPrograms - allPrograms"))
+	start := time.Now()
+	res := ""
+
+	defer func() {
+		metrics.ObserveRequestGQL(time.Since(start), res)
+	}()
+
+	allPrograms, err := r.application.Database.GetAllPrograms()
+	if err != nil {
+		res = metrics.GQLError
+		return nil, gqlerror.Errorf("неподдерживаемые данные: %s", err.Error())
+	}
+
+	marshalledPrograms, _ := bson.Marshal(allPrograms)
+	var programs []*model.Program
+	if err := bson.Unmarshal(marshalledPrograms, &programs); err != nil {
+		res = metrics.GQLError
+		return nil, gqlerror.Errorf("ошибка анмаршаллинга: %s", err.Error())
+	}
+
+	res = metrics.GQLSuccess
+	return programs, nil
 }
 
 // Program is the resolver for the program field.
 func (r *queryResolver) Program(ctx context.Context, id string) (*model.Program, error) {
-	panic(fmt.Errorf("not implemented: Program - program"))
+	start := time.Now()
+	res := ""
+
+	defer func() {
+		metrics.ObserveRequestGQL(time.Since(start), res)
+	}()
+
+	index := id
+
+	// Получение из кеша.
+	unmarshalledProgram, err := r.application.Redis.Get(context.TODO(), index).Result()
+	if err == nil {
+		var results *model.Program
+		json.Unmarshal([]byte(unmarshalledProgram), &results)
+		res = metrics.GQLError
+	}
+
+	program, err := r.application.Database.GetProgram(index)
+	if err != nil {
+		res = metrics.GQLError
+
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, gqlerror.Errorf(fmt.Sprintf("нет элемента с указанным id = %s", index))
+		}
+
+		return nil, gqlerror.Errorf(fmt.Sprintf("неподдерживаемые данные"))
+	}
+
+	// Положили в кеш.
+	marshalled_bson, _ := bson.Marshal(program)
+	var p models.CachedProgram
+	bson.Unmarshal(marshalled_bson, &p)
+	_, err = r.application.Redis.Set(context.TODO(), index, p, 5*time.Minute).Result()
+	if err != nil {
+		res = metrics.GQLError
+		slog.Info("Ошибка сохранения в кеше: ", err.Error())
+	}
+
+	var result *model.Program
+	err = json.Unmarshal([]byte(unmarshalledProgram), &result)
+	if err != nil {
+		res = metrics.GQLError
+		return nil, gqlerror.Errorf("Ошибка анмаршаллинга", err.Error())
+	}
+
+	res = metrics.GQLSuccess
+	return result, nil
 }
 
 // ProgramsCount is the resolver for the programsCount field.
 func (r *queryResolver) ProgramsCount(ctx context.Context) (int32, error) {
-	panic(fmt.Errorf("not implemented: ProgramsCount - programsCount"))
+	start := time.Now()
+	res := ""
+
+	defer func() {
+		metrics.ObserveRequestGQL(time.Since(start), res)
+	}()
+
+	count, err := r.application.Database.CountPrograms()
+	if err != nil {
+		res = metrics.GQLError
+		return -1, gqlerror.Errorf("не удалось подсчитать кол-во програм")
+	}
+
+	res = metrics.GQLSuccess
+	return int32(count), nil
 }
 
 // ProgramFilter is the resolver for the programFilter field.
 func (r *queryResolver) ProgramFilter(ctx context.Context, filter model.ProgramFilterInput) ([]*model.Program, error) {
+	start := time.Now()
+	res := ""
+
+	defer func() {
+		metrics.ObserveRequestGQL(time.Since(start), res)
+	}()
+
 	programs, err := r.application.Database.FilterPrograms(filter)
 	if err != nil {
+		res = metrics.GQLError
 		return nil, gqlerror.Errorf("не получить элементы по фильтру: %s", err.Error())
 	}
 
 	programsBytes, err := json.Marshal(programs)
 	if err != nil {
+		res = metrics.GQLError
 		return nil, gqlerror.Errorf("не удалось сформировать ответ: %s", err.Error())
 	}
 
 	var results []*model.Program
 	err = json.Unmarshal(programsBytes, &results)
 
+	res = metrics.GQLSuccess
 	return results, nil
 }
 

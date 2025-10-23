@@ -49,8 +49,8 @@ func (db Processor) FilterPrograms(filter model.ProgramFilterInput) ([]models.Ca
 		dbFilter = append(dbFilter, bson.E{"wasconfirmed", *filter.Wasconfirmed})
 	}
 
-	if filter.ConfirmedBy != nil {
-		dbFilter = append(dbFilter, bson.E{"confirmedby", *filter.ConfirmedBy})
+	if filter.Confirmedby != nil {
+		dbFilter = append(dbFilter, bson.E{"confirmedby", *filter.Confirmedby})
 	}
 
 	cursor, err := db.Client.Database(db.DbName).Collection(db.ColName).Find(context.TODO(), dbFilter)

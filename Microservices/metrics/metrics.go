@@ -23,7 +23,7 @@ const (
 
 var requestMetricsGQL = promauto.NewSummaryVec(prometheus.SummaryOpts{
 	Namespace: "microservice",
-	Name:      "gql request",
+	Name:      "gql",
 }, []string{"status"})
 
 func ObserveRequestGQL(d time.Duration, result string) {

@@ -106,3 +106,7 @@ func (db Processor) CountPrograms() (int64, error) {
 	res, err := collection.CountDocuments(context.TODO(), bson.D{})
 	return res, err
 }
+
+func (db Processor) Ping() error {
+	return db.Client.Ping(context.TODO(), nil)
+}

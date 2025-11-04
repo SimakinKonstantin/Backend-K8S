@@ -1,4 +1,7 @@
+#go run github.com/99designs/gqlgen generate
+
 type Program {
+  _id: String!
   confirmedby: String!
   description: String!
   name: String!
@@ -16,7 +19,7 @@ input CreateProgramInput {
 input UpdateProgramInput {
   id: String!
   name: Int
-  description: Int
+  description: String
   price: Int
 }
 
@@ -29,7 +32,7 @@ input ProgramFilterInput {
 }
 
 type Query {
-  allPrograms: [Program!]! #
+  allPrograms: [Program!]!
   program(id: String!): Program!
   programsCount: Int!
   programFilter(filter: ProgramFilterInput!): [Program!]!

@@ -2,15 +2,18 @@ package main
 
 import (
 	"UserMicroservice/metrics"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/segmentio/kafka-go"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
@@ -355,6 +358,73 @@ func (app *App) isValidUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(statusCode)
 }
 
+// @Summary		   Пинг сервера
+// @Description	   Проверка доступности сервиса
+// @Success		   200 "Сервис доступен"
+// @Router		   /ping [get]
+func (app *App) Ping(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	statusCode := http.StatusOK
+
+	defer func() {
+		metrics.ObserveRequest(time.Since(start), statusCode)
+	}()
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// @Summary		   Проверка, что все зависимости готовы к использованию
+// @Success		   200 "Сервис готов к использованию"
+// @Router		   /health [get]
+func (app *App) Health(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	statusCode := http.StatusOK
+
+	defer func() {
+		metrics.ObserveRequest(time.Since(start), statusCode)
+	}()
+
+	err := app.checkKafka()
+	if err != nil {
+		slog.Error(err.Error())
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	err = app.checkMongoDB()
+	if err != nil {
+		slog.Error(err.Error())
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (app *App) checkMongoDB() error {
+	if err := app.Database.Ping(); err != nil {
+		return fmt.Errorf("ошибка пинга mongoDb: %w", err)
+	}
+
+	return nil
+}
+
+func (app *App) checkKafka() error {
+	dialer := &kafka.Dialer{
+		Timeout:   10 * time.Second,
+		DualStack: true,
+	}
+
+	conn, err := dialer.DialContext(context.Background(), "tcp", os.Getenv("KAFKA"))
+	if err != nil {
+		return fmt.Errorf("ошибка пинга kafka: %w", err)
+	}
+
+	defer conn.Close()
+
+	return nil
+}
+
 func (app *App) Routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /users", app.showAllHandler)
@@ -365,6 +435,7 @@ func (app *App) Routes() *http.ServeMux {
 	mux.HandleFunc("DELETE /users", app.deleteAllHandler)
 	mux.HandleFunc("GET /users/count", app.getCount)
 	mux.HandleFunc("GET /users/validness", app.isValidUser)
+	mux.HandleFunc("GET /health", app.Health)
 	mux.HandleFunc("/swagger/", httpSwagger.Handler(httpSwagger.URL("http://localhost:8080/swagger/doc.json")))
 	mux.Handle("/metrics", promhttp.Handler())
 	return mux

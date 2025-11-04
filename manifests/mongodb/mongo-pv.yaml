@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-pv
+spec:
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain # Чтобы данные сохранились после удаления PVC.
+  hostPath:
+    path: /mnt/data/mongo # Путь на ноде, где будут лежать данные.
+  claimRef:
+    namespace: default
+    name: mongo-pv-claim

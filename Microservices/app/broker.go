@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"github.com/segmentio/kafka-go"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"log/slog"
@@ -10,7 +9,7 @@ import (
 
 // userId - id пользователя, который подтверждает; objectId - id объекта для подтверждения
 func Write(producer *kafka.Writer, objectId string, userId string) error {
-	slog.Info(fmt.Sprintf("Object::Записано сообщение в очередь ObjectId: %s", objectId))
+	//slog.Info(fmt.Sprintf("Object::Записано сообщение в очередь ObjectId: %s", objectId))
 
 	return producer.WriteMessages(context.TODO(), kafka.Message{
 		Key:   []byte(objectId),
@@ -27,7 +26,7 @@ func Listen(consumer *kafka.Reader, app *App) {
 			return
 		}
 
-		slog.Info(fmt.Sprintf("Object::Получено сообщение из очереди ObjectId: %s", string(msg.Key)))
+		//slog.Info(fmt.Sprintf("Object::Получено сообщение из очереди ObjectId: %s", string(msg.Key)))
 
 		objectId, err := bson.ObjectIDFromHex(string(msg.Key))
 		if err != nil {

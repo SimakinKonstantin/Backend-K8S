@@ -9,15 +9,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/vektah/gqlparser/v2/gqlerror"
-	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 	"lab1/app"
 	"lab1/graphq/graph/model"
 	"lab1/metrics"
 	"lab1/models"
 	"log/slog"
 	"time"
+
+	"github.com/vektah/gqlparser/v2/gqlerror"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 // DeleteAllPrograms is the resolver for the DeleteAllPrograms field.
@@ -176,11 +177,20 @@ func (r *queryResolver) AllPrograms(ctx context.Context) ([]*model.Program, erro
 		return nil, gqlerror.Errorf("неподдерживаемые данные: %s", err.Error())
 	}
 
-	marshalledPrograms, _ := bson.Marshal(allPrograms)
-	var programs []*model.Program
-	if err := bson.Unmarshal(marshalledPrograms, &programs); err != nil {
-		res = metrics.GQLError
-		return nil, gqlerror.Errorf("ошибка анмаршаллинга: %s", err.Error())
+	programs := make([]*model.Program, 0, len(allPrograms))
+
+	for _, doc := range allPrograms {
+		var program model.Program
+		data, err := json.Marshal(doc)
+		if err != nil {
+			res = metrics.GQLError
+			return nil, gqlerror.Errorf("ошибка маршаллинга документа: %s", err.Error())
+		}
+		if err := json.Unmarshal(data, &program); err != nil {
+			res = metrics.GQLError
+			return nil, gqlerror.Errorf("ошибка анмаршаллинга документа: %s", err.Error())
+		}
+		programs = append(programs, &program)
 	}
 
 	res = metrics.GQLSuccess

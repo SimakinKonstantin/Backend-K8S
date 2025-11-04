@@ -13,6 +13,7 @@ type Mutation struct {
 }
 
 type Program struct {
+	ID           string `json:"_id"`
 	Confirmedby  string `json:"confirmedby"`
 	Description  string `json:"description"`
 	Name         string `json:"name"`
@@ -32,8 +33,8 @@ type Query struct {
 }
 
 type UpdateProgramInput struct {
-	ID          string `json:"id"`
-	Name        *int32 `json:"name,omitempty"`
-	Description *int32 `json:"description,omitempty"`
-	Price       *int32 `json:"price,omitempty"`
+	ID          string  `json:"id"`
+	Name        *int32  `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Price       *int32  `json:"price,omitempty"`
 }

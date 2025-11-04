@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/segmentio/kafka-go"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"log/slog"
@@ -16,7 +15,7 @@ func ProcessMessage(consumer *kafka.Reader, producer *kafka.Writer, db *DbProces
 			return err
 		}
 
-		slog.Info(fmt.Sprintf("Users::прочитано сообщение из очереди ObjectId: %s", msg.Key))
+		//slog.Info(fmt.Sprintf("Users::прочитано сообщение из очереди ObjectId: %s", msg.Key))
 
 		// Увеличиваем счетчик в базе.
 		err = db.IncreaseCounter()
@@ -43,7 +42,7 @@ func ProcessMessage(consumer *kafka.Reader, producer *kafka.Writer, db *DbProces
 			Value: []byte(updatedStatus),
 		})
 
-		slog.Info(fmt.Sprintf("Users::записано сообщение в очередь ObjectId: %s", msg.Key))
+		//slog.Info(fmt.Sprintf("Users::записано сообщение в очередь ObjectId: %s", msg.Key))
 	}
 	return nil
 }

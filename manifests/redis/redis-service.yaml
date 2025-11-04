@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+spec:
+  selector:
+    pod: redis-pod # Трафик будет перенаправляться к подам с этой меткой.
+  ports:
+    - port: 6379 # Порт, куда будет перенаправляться трафик
+  type: ClusterIP

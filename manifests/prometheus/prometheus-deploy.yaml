@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      pod: prometheus-pod
+template:
+  metadata:
+    labels:
+      pod: prometheus-pod
+  spec:
+    containers:
+    - name: prometheus-container
+      image: docker.io/prom/prometheus:latest
+    volumeMounts:
+    - name: prometheus-config
+      mountPath: /etc/prometheus/prometheus.yml # По этому пути в контейнере будет лежать конфиг из конфиг мапы.
+    volumes:
+    - name: config-volume
+      configMap:
+        name: prometheus-config

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      pod: mongo-pod
+template:
+  metadata:
+    labels:
+      pod: mongo-pod
+  spec:
+    containers:
+    - name: mongo-container
+      image: docker.io/mongo:6.0
+      env:
+        - name: MONGO_INITDB_DATABASE
+          value: "mydb"
+      volumeMounts:
+        - name: mongo-storage
+          mountPath: /data/db # По этому пути внутри контейнера можно будет обратиться к данным PV.
+    volumes:
+       - name: mongo-storage
+         persistentVolumeClaim:
+           claimName: mongo-pv-claim

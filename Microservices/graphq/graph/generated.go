@@ -57,6 +57,7 @@ type ComplexityRoot struct {
 	Program struct {
 		Confirmedby  func(childComplexity int) int
 		Description  func(childComplexity int) int
+		ID           func(childComplexity int) int
 		Name         func(childComplexity int) int
 		Price        func(childComplexity int) int
 		Wasconfirmed func(childComplexity int) int
@@ -154,6 +155,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Program.Description(childComplexity), true
+	case "Program._id":
+		if e.complexity.Program.ID == nil {
+			break
+		}
+
+		return e.complexity.Program.ID(childComplexity), true
 	case "Program.name":
 		if e.complexity.Program.Name == nil {
 			break
@@ -548,6 +555,8 @@ func (ec *executionContext) fieldContext_Mutation_addProgram(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Program__id(ctx, field)
 			case "confirmedby":
 				return ec.fieldContext_Program_confirmedby(ctx, field)
 			case "description":
@@ -613,6 +622,35 @@ func (ec *executionContext) fieldContext_Mutation_updateProgram(ctx context.Cont
 	if fc.Args, err = ec.field_Mutation_updateProgram_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Program__id(ctx context.Context, field graphql.CollectedField, obj *model.Program) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Program__id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Program__id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Program",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -786,6 +824,8 @@ func (ec *executionContext) fieldContext_Query_allPrograms(_ context.Context, fi
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Program__id(ctx, field)
 			case "confirmedby":
 				return ec.fieldContext_Program_confirmedby(ctx, field)
 			case "description":
@@ -828,6 +868,8 @@ func (ec *executionContext) fieldContext_Query_program(ctx context.Context, fiel
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Program__id(ctx, field)
 			case "confirmedby":
 				return ec.fieldContext_Program_confirmedby(ctx, field)
 			case "description":
@@ -910,6 +952,8 @@ func (ec *executionContext) fieldContext_Query_programFilter(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Program__id(ctx, field)
 			case "confirmedby":
 				return ec.fieldContext_Program_confirmedby(ctx, field)
 			case "description":
@@ -2625,7 +2669,7 @@ func (ec *executionContext) unmarshalInputUpdateProgramInput(ctx context.Context
 			it.Name = data
 		case "description":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2732,6 +2776,11 @@ func (ec *executionContext) _Program(ctx context.Context, sel ast.SelectionSet, 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Program")
+		case "_id":
+			out.Values[i] = ec._Program__id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "confirmedby":
 			out.Values[i] = ec._Program_confirmedby(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

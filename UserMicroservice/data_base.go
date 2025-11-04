@@ -130,3 +130,7 @@ func (db *DbProcessor) FindUserByLogin(login string) bool {
 	}
 	return true
 }
+
+func (db *DbProcessor) Ping() error {
+	return db.Client.Ping(context.TODO(), nil)
+}

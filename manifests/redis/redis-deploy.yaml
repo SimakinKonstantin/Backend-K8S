@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      pod: redis-pod
+template:
+  metadata:
+    labels:
+      pod: redis-pod
+  spec:
+    containers:
+    - name: redis-container
+      image: docker.io/redis:7.0.15-alpine
+    volumeMounts:
+      - name: redis-storage
+        mountPath: /data # По этому пути внутри контейнера можно будет обратиться к данным PV.
+    volumes:
+      - name: redis-storage
+        persistentVolumeClaim:
+          claimName: redis-pv-claim

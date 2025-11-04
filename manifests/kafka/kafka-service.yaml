@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+spec:
+  selector:
+    pod: kafka-pod # Трафик будет перенаправляться к подам с этой меткой.
+  ports:
+    - port: 9092 # Порт, куда будет перенаправляться трафик
+    - port: 9093
+  type: ClusterIP

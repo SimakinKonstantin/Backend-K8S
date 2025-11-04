@@ -23,6 +23,40 @@ func setErrorStatus(statusCode int, w http.ResponseWriter) {
 	metrics.ErrorMetrics.Inc()
 }
 
+// @Summary		   Liveness Probe
+// @Description	   Проверка готовности сервиса
+// @Success		   200 "Все зависимости сервиса инициализированы, он готов к работе"
+// @Router		   /health
+func (app *settings) Health(w http.ResponseWriter, r *http.Request) {
+	microserviceResp, err := http.Get(app.microserviceURL + "/health")
+	if err != nil {
+		slog.Error("Ошибка в /health microservice: ", err.Error())
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	userserviceResp, err := http.Get(app.userServiceURL + "/health")
+	if err != nil {
+		slog.Error("Ошибка в /health users service: ", err.Error())
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	if microserviceResp.StatusCode != http.StatusOK {
+		slog.Error("health сервиса програм тренировок НЕ вернул 200!")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	if userserviceResp.StatusCode != http.StatusOK {
+		slog.Error("health сервиса пользователей НЕ вернул 200!")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 // @Security BearerAuth
 // @Summary        Получить все программы тренировок
 // @Description    Возвращает список программ

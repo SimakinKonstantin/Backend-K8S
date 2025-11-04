@@ -16,6 +16,7 @@ import (
 	"lab1/models"
 	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
@@ -416,6 +417,88 @@ func (app *App) GetCount(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%d", count)
 }
 
+// @Summary		   Пинг сервера
+// @Description	   Проверка доступности сервиса
+// @Success		   200 "Сервис доступен"
+// @Router		   /ping [get]
+func (app *App) Ping(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	statusCode := http.StatusOK
+
+	defer func() {
+		metrics.ObserveRequest(time.Since(start), statusCode)
+	}()
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// @Summary		   Проверка, что все зависимости готовы к использованию
+// @Success		   200 "Сервис готов к использованию"
+// @Router		   /health [get]
+func (app *App) Health(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	statusCode := http.StatusOK
+
+	defer func() {
+		metrics.ObserveRequest(time.Since(start), statusCode)
+	}()
+
+	err := app.checkKafka()
+	if err != nil {
+		slog.Error(err.Error())
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	err = app.checkRedis()
+	if err != nil {
+		slog.Error(err.Error())
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	err = app.checkMongoDB()
+	if err != nil {
+		slog.Error(err.Error())
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (app *App) checkRedis() error {
+	if _, err := app.Redis.Ping(context.Background()).Result(); err != nil {
+		return fmt.Errorf("ошибка пинга redis: %w", err)
+	}
+
+	return nil
+}
+
+func (app *App) checkMongoDB() error {
+	if err := app.Database.Ping(); err != nil {
+		return fmt.Errorf("ошибка пинга mongoDb: %w", err)
+	}
+
+	return nil
+}
+
+func (app *App) checkKafka() error {
+	dialer := &kafka.Dialer{
+		Timeout:   10 * time.Second,
+		DualStack: true,
+	}
+
+	conn, err := dialer.DialContext(context.Background(), "tcp", os.Getenv("KAFKA_ADDR"))
+	if err != nil {
+		return fmt.Errorf("ошибка пинга kafka: %w", err)
+	}
+
+	defer conn.Close()
+
+	return nil
+}
+
 func (app App) UpdateStatus(programId bson.ObjectID, newStatus string) error {
 	collection := app.Database.Client.Database(app.Database.DbName).Collection(app.Database.ColName)
 	collection.UpdateOne(
@@ -438,6 +521,7 @@ func (app *App) Routes() *http.ServeMux {
 	mux.HandleFunc("DELETE /programs/", app.DeleteHandler)
 	mux.HandleFunc("DELETE /programs", app.DeleteAllHandler)
 	mux.HandleFunc("GET /programs/count", app.GetCount)
+	mux.HandleFunc("GET /health", app.Health)
 	mux.HandleFunc("/swagger/", httpSwagger.Handler(httpSwagger.URL("http://localhost:8081/swagger/doc.json")))
 	mux.Handle("/metrics", promhttp.Handler())
 	return mux

@@ -20,12 +20,12 @@ template:
             value: "mongodb://mongodb:27017"
           - name: KAFKA
             value: "kafka:9092"
-    readinessProbe:
-      httpGet:
-        path: /health
-        scheme: HTTP
-        initialDelaySeconds: 10
-        periodSeconds: 5
-        timeoutSeconds: 2
-        failureThreshold: 3
-        successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /health
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+          successThreshold: 1

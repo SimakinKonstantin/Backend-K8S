@@ -7,4 +7,5 @@ spec:
     pod: programs-service-pod # Трафик будет перенаправляться к подам с этой меткой.
   ports:
     - port: 8081 # Порт, куда будет перенаправляться трафик
+    - port: 8010 # Порт GraphQL, как в compose
   type: NodePort

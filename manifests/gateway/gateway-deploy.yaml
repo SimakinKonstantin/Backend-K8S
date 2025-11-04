@@ -20,10 +20,10 @@ template:
           value: "http://microservice:8081"
         - name: USER_SERVICE_URL
           value: "http://user_service:8080"
-    readinessProbe:
-      httpGet:
-        path: /health
-        scheme: HTTP
+      readinessProbe:
+        httpGet:
+          path: /health
+          scheme: HTTP
         initialDelaySeconds: 10
         periodSeconds: 5
         timeoutSeconds: 2

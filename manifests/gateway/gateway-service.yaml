@@ -7,5 +7,4 @@ spec:
     pod: gateway-pod
   ports:
     - port: 8083 # Порт, куда будет перенаправляться трафик
-      nodePort: 8083 # Порт, доступный из вне кластера.
   type: NodePort

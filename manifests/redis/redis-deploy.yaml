@@ -15,9 +15,10 @@ template:
     containers:
     - name: redis-container
       image: docker.io/redis:7.0.15-alpine
-    volumeMounts:
-      - name: redis-storage
-        mountPath: /data # По этому пути внутри контейнера можно будет обратиться к данным PV.
+      args: ["--appendonly", "yes"]
+      volumeMounts:
+        - name: redis-storage
+          mountPath: /data # По этому пути внутри контейнера можно будет обратиться к данным PV.
     volumes:
       - name: redis-storage
         persistentVolumeClaim:

@@ -15,9 +15,10 @@ template:
     containers:
     - name: prometheus-container
       image: docker.io/prom/prometheus:latest
-    volumeMounts:
-    - name: prometheus-config
-      mountPath: /etc/prometheus/prometheus.yml # По этому пути в контейнере будет лежать конфиг из конфиг мапы.
+      volumeMounts:
+      - name: config-volume
+        mountPath: /etc/prometheus/prometheus.yml
+        subPath: prometheus.yml
     volumes:
     - name: config-volume
       configMap:

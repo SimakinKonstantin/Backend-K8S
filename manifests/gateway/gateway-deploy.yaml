@@ -14,7 +14,7 @@ template:
   spec:
     containers:
     - name: gateway-container
-      image: docker.io/konst26/gateway
+      image: docker.io/konst26/gateway:latest
       env:
         - name: MICROSERVICE_URL
           value: "http://microservice:8081"

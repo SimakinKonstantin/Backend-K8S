@@ -14,7 +14,7 @@ template:
   spec:
     containers:
       - name: users-service-container
-        image: docker.io/konst26/user-service
+        image: docker.io/konst26/user-service:latest
         env:
           - name: MONGO_URL
             value: "mongodb://mongodb:27017"

@@ -3,25 +3,25 @@ kind: Deployment
 metadata:
   name: grafana
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       pod: grafana-pod
-template:
-  metadata:
-    labels:
-      pod: grafana-pod
-  spec:
-    containers:
-    - name: grafana-container
-      image: docker.io/grafana/grafana-oss:latest
-      env:
-        - name: GF_SECURITY_ADMIN_PASSWORD
-          value: "admin"
-      volumeMounts:
+  template:
+    metadata:
+      labels:
+        pod: grafana-pod
+    spec:
+      containers:
+      - name: grafana-container
+        image: docker.io/grafana/grafana-oss:latest
+        env:
+          - name: GF_SECURITY_ADMIN_PASSWORD
+            value: "admin"
+        volumeMounts:
+          - name: grafana-storage
+            mountPath: /var/lib/grafana # По этому пути ихнутри контейнера можно будет обратиться к данным PV.
+      volumes:
         - name: grafana-storage
-          mountPath: /var/lib/grafana # По этому пути ихнутри контейнера можно будет обратиться к данным PV.
-    volumes:
-      - name: grafana-storage
-        persistentVolumeClaim:
-          claimName: grafana-pv-claim
+          persistentVolumeClaim:
+            claimName: grafana-pv-claim

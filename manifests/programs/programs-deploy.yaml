@@ -7,27 +7,28 @@ spec:
   selector:
     matchLabels:
       pod: programs-service-pod
-template:
-  metadata:
-    labels:
-      pod: programs-service-pod
-  spec:
-    containers:
-      - name: programs-service-container
-        image: docker.io/konst26/programs-service:latest
-        env:
-          - name: MONGO_URL
-            value: "mongodb://mongodb:27017"
-          - name: REDIS_ADDR
-            value: "redis:6379"
-          - name: KAFKA_ADDR
-            value: "kafka:9092"
-        readinessProbe:
-          httpGet:
-            path: /health
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 2
-          failureThreshold: 3
-          successThreshold: 1
+  template:
+    metadata:
+      labels:
+        pod: programs-service-pod
+    spec:
+      containers:
+        - name: programs-service-container
+          image: konst26/programs-service:2
+          env:
+            - name: MONGO_URL
+              value: "mongodb://mongodb:27017"
+            - name: REDIS_ADDR
+              value: "redis:6379"
+            - name: KAFKA_ADDR
+              value: "kafka:9092"
+          readinessProbe:
+            httpGet:
+              path: /health
+              scheme: HTTP
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+            successThreshold: 1

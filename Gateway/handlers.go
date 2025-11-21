@@ -671,6 +671,7 @@ func (s *settings) routes() *http.ServeMux {
 	mux.HandleFunc("DELETE /gateway/users", s.userDeleteAllHandler)
 	mux.HandleFunc("GET /gateway/users/count", s.userGetCount)
 	mux.HandleFunc("GET /login", s.loginHandler)
+	mux.HandleFunc("GET /health", s.Health)
 	mux.HandleFunc("/swagger/", httpSwagger.Handler(httpSwagger.URL("http://localhost:8083/swagger/doc.json")))
 	mux.Handle("/metrics", promhttp.Handler())
 	return mux

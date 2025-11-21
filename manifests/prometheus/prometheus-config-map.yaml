@@ -16,4 +16,6 @@ data:
       - job_name: 'prometheus-gateway'
         static_configs:
           - targets: ['gateway:8083']
-
+      - job_name: 'kube-state-metrics'
+        static_configs:
+          - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']

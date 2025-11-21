@@ -7,19 +7,19 @@ spec:
   selector:
     matchLabels:
       pod: prometheus-pod
-template:
-  metadata:
-    labels:
-      pod: prometheus-pod
-  spec:
-    containers:
-    - name: prometheus-container
-      image: docker.io/prom/prometheus:latest
-      volumeMounts:
+  template:
+    metadata:
+      labels:
+        pod: prometheus-pod
+    spec:
+      containers:
+      - name: prometheus-container
+        image: docker.io/prom/prometheus:latest
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/prometheus/prometheus.yml
+          subPath: prometheus.yml
+      volumes:
       - name: config-volume
-        mountPath: /etc/prometheus/prometheus.yml
-        subPath: prometheus.yml
-    volumes:
-    - name: config-volume
-      configMap:
-        name: prometheus-config
+        configMap:
+          name: prometheus-config

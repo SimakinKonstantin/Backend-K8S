@@ -3,29 +3,30 @@ kind: Deployment
 metadata:
   name: users-service
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       pod: users-service-pod
-template:
-  metadata:
-    labels:
-      pod: users-service-pod
-  spec:
-    containers:
-      - name: users-service-container
-        image: docker.io/konst26/user-service:latest
-        env:
-          - name: MONGO_URL
-            value: "mongodb://mongodb:27017"
-          - name: KAFKA
-            value: "kafka:9092"
-        readinessProbe:
-          httpGet:
-            path: /health
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 2
-          failureThreshold: 3
-          successThreshold: 1
+  template:
+    metadata:
+      labels:
+        pod: users-service-pod
+    spec:
+      containers:
+        - name: users-service-container
+          image: konst26/user-service:2
+          env:
+            - name: MONGO_URL
+              value: "mongodb://mongodb:27017"
+            - name: KAFKA
+              value: "kafka:9092"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+            successThreshold: 1

@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Симакин К.С. Акчурин А.Р. Gateway",
+        "description": "Gateway",
         "title": "Swagger Example API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
@@ -15,7 +15,6 @@
         },
         "version": "2.0"
     },
-    "host": "localhost:8083",
     "paths": {
         "/gateway/programs": {
             "get": {
@@ -500,7 +499,12 @@
                 }
             },
             "post": {
-                "description": "Добавляет в список пользователей нового",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Добавляет пользователя от имени авторизованного пользователя. Для публичной регистрации используйте /register.",
                 "produces": [
                     "application/json"
                 ],
@@ -776,6 +780,77 @@
                     },
                     "422": {
                         "description": "Неподдерживаемые данные",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "Создаёт нового пользователя без JWT. После регистрации получите токен через /login.",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Аутентификация"
+                ],
+                "summary": "Зарегистрировать пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Имя",
+                        "name": "Name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фамилия",
+                        "name": "Surname",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Логин",
+                        "name": "login",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Возраст",
+                        "name": "Age",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Идентификатор созданного пользователя",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибки в передаваемых параметрах",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    },
+                    "405": {
+                        "description": "Неверный метод",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    },
+                    "422": {
+                        "description": "Не удалось создать пользователя",
                         "schema": {
                             "$ref": "#/definitions/main.Error"
                         }

@@ -19,3 +19,13 @@ data:
       - job_name: 'kube-state-metrics'
         static_configs:
           - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
+      - job_name: 'node-exporter'
+        static_configs:
+          - targets:
+              - 'minikube:9100'
+              - 'minikube-m02:9100'
+              - 'minikube-m03:9100'
+      - job_name: 'nginx-ingress-metrics'
+        static_configs:
+          - targets:
+            - '10.244.1.4:9113'

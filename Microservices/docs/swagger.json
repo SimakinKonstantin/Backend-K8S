@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Симакин К.С. Акчурин А.Р.",
+        "description": "Сервис программ тренировок",
         "title": "Swagger Example API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
@@ -15,8 +15,28 @@
         },
         "version": "2.0"
     },
-    "host": "localhost:8081",
     "paths": {
+        "/health": {
+            "get": {
+                "summary": "Проверка, что все зависимости готовы к использованию",
+                "responses": {
+                    "200": {
+                        "description": "Сервис готов к использованию"
+                    }
+                }
+            }
+        },
+        "/ping": {
+            "get": {
+                "description": "Проверка доступности сервиса",
+                "summary": "Пинг сервера",
+                "responses": {
+                    "200": {
+                        "description": "Сервис доступен"
+                    }
+                }
+            }
+        },
         "/programs": {
             "get": {
                 "description": "Возвращает список программ",
@@ -31,13 +51,13 @@
                     "200": {
                         "description": "Успешно получены все программы тренировок",
                         "schema": {
-                            "$ref": "#/definitions/main.Program"
+                            "$ref": "#/definitions/models.Program"
                         }
                     },
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -55,7 +75,7 @@
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -84,19 +104,19 @@
                     "200": {
                         "description": "Успешно получена программа тренировок",
                         "schema": {
-                            "$ref": "#/definitions/main.Program"
+                            "$ref": "#/definitions/models.Program"
                         }
                     },
                     "404": {
                         "description": "Нет элемента с указанным идентификатором",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -147,19 +167,19 @@
                     "400": {
                         "description": "Ошибки в передаваемых параметрах",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "405": {
                         "description": "Неверный метод",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -189,25 +209,25 @@
                     "400": {
                         "description": "Ошибки в передаваемых параметрах",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "404": {
                         "description": "Нет элемента с указанным идентификатором",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "405": {
                         "description": "Неверный метод",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -255,19 +275,19 @@
                     "400": {
                         "description": "Неверное значение цены",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "404": {
                         "description": "Нет элемента с таким идентификатором",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -293,7 +313,7 @@
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -301,7 +321,7 @@
         }
     },
     "definitions": {
-        "main.Error": {
+        "models.Error": {
             "type": "object",
             "properties": {
                 "message": {
@@ -309,7 +329,7 @@
                 }
             }
         },
-        "main.Program": {
+        "models.Program": {
             "type": "object",
             "properties": {
                 "confirmedby": {

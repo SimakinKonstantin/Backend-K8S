@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: gateway-container
-        image: konst26/gateway:3
+        image: konst26/gateway:5
         env:
           - name: MICROSERVICE_URL
             value: "http://microservice:8081"

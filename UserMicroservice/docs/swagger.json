@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Симакин К.С. Акчурин А.Р.",
+        "description": "Сервис пользователей",
         "title": "Swagger Example API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
@@ -15,8 +15,28 @@
         },
         "version": "2.0"
     },
-    "host": "localhost:8080",
     "paths": {
+        "/health": {
+            "get": {
+                "summary": "Проверка, что все зависимости готовы к использованию",
+                "responses": {
+                    "200": {
+                        "description": "Сервис готов к использованию"
+                    }
+                }
+            }
+        },
+        "/ping": {
+            "get": {
+                "description": "Проверка доступности сервиса",
+                "summary": "Пинг сервера",
+                "responses": {
+                    "200": {
+                        "description": "Сервис доступен"
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Возвращает список пользователей",

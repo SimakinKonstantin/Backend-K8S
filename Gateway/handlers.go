@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 )
 
 type settings struct {
@@ -23,10 +24,6 @@ func setErrorStatus(statusCode int, w http.ResponseWriter) {
 	metrics.ErrorMetrics.Inc()
 }
 
-// @Summary		   Liveness Probe
-// @Description	   Проверка готовности сервиса
-// @Success		   200 "Все зависимости сервиса инициализированы, он готов к работе"
-// @Router		   /health
 func (app *settings) Health(w http.ResponseWriter, r *http.Request) {
 	microserviceResp, err := http.Get(app.microserviceURL + "/health")
 	if err != nil {
@@ -422,8 +419,9 @@ func (s *settings) userUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	s.forwardResp(&w, r, s.userServiceURL)
 }
 
+// @Security BearerAuth
 // @Summary        Добавить нового пользователя
-// @Description    Добавляет в список пользователей нового
+// @Description    Добавляет пользователя от имени авторизованного пользователя. Для публичной регистрации используйте /register.
 // @Tags 		   Пользователи
 // @Param		   Name formData string true "Имя"
 // @Param		   Surname formData string true "Фамилия"
@@ -437,6 +435,46 @@ func (s *settings) userUpdateHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure        422 {object} Error "Неподдерживаемые данные"
 // @Router         /gateway/users/ [post]
 func (s *settings) userCreateHandler(w http.ResponseWriter, r *http.Request) {
+	loginJWT, err := s.parseJWT(r.Header.Get("Authorization"))
+	if err != nil {
+		setErrorStatus(http.StatusUnauthorized, w)
+		json.NewEncoder(w).Encode(Error{err.Error()})
+		return
+	}
+
+	isValid, err := s.isRealUser(loginJWT)
+	if err != nil {
+		setErrorStatus(http.StatusUnauthorized, w)
+		json.NewEncoder(w).Encode(Error{err.Error()})
+		return
+	}
+
+	if !isValid {
+		setErrorStatus(http.StatusUnauthorized, w)
+		json.NewEncoder(w).Encode(Error{"невалидный логин"})
+		return
+	}
+
+	s.forwardResp(&w, r, s.userServiceURL)
+}
+
+// @Summary        Зарегистрировать пользователя
+// @Description    Создаёт нового пользователя без JWT. После регистрации получите токен через /login.
+// @Tags 		   Аутентификация
+// @Accept         application/x-www-form-urlencoded
+// @Produce        json
+// @Param		   Name formData string true "Имя"
+// @Param		   Surname formData string true "Фамилия"
+// @Param		   login formData string true "Логин"
+// @Param		   Age formData int true "Возраст"
+// @Success        200 {string} string "Идентификатор созданного пользователя"
+// @Failure        400 {object} Error "Ошибки в передаваемых параметрах"
+// @Failure        405 {object} Error "Неверный метод"
+// @Failure        422 {object} Error "Не удалось создать пользователя"
+// @Router         /register [post]
+func (s *settings) registerHandler(w http.ResponseWriter, r *http.Request) {
+	// Users service ожидает создание пользователя по этому пути.
+	r.URL.Path = "/users/"
 	s.forwardResp(&w, r, s.userServiceURL)
 }
 
@@ -606,9 +644,8 @@ func (s *settings) forwardResp(w *http.ResponseWriter, r *http.Request, baseUrl 
 
 	newURL, _ := url.Parse(baseUrl)
 
-	// Обрезаем, чтобы получить независимый от base url.
-	cutFrom := len("gateway/")
-	r.URL.Path = r.URL.Path[cutFrom:]
+	// Убираем префикс Gateway, сохраняя исходный путь для внутренних сервисов.
+	r.URL.Path = strings.TrimPrefix(r.URL.Path, "/gateway")
 
 	proxy := httputil.NewSingleHostReverseProxy(newURL)
 	proxy.ServeHTTP(*w, r)
@@ -625,13 +662,21 @@ func (s *settings) parseJWT(tokenInfo string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("не получилось распарсить токен " + err.Error())
 	}
+	if !token.Valid {
+		return "", fmt.Errorf("токен недействителен")
+	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return "", fmt.Errorf("не получилось распарсить токен")
 	}
 
-	return claims["sub"].(string), nil
+	login, ok := claims["sub"].(string)
+	if !ok || login == "" {
+		return "", fmt.Errorf("в токене отсутствует логин")
+	}
+
+	return login, nil
 }
 
 // По логину определяет: находится ли пользователь в базе.
@@ -671,6 +716,7 @@ func (s *settings) routes() *http.ServeMux {
 	mux.HandleFunc("DELETE /gateway/users", s.userDeleteAllHandler)
 	mux.HandleFunc("GET /gateway/users/count", s.userGetCount)
 	mux.HandleFunc("GET /login", s.loginHandler)
+	mux.HandleFunc("POST /register", s.registerHandler)
 	mux.HandleFunc("GET /health", s.Health)
 	mux.HandleFunc("/swagger/", httpSwagger.Handler(httpSwagger.URL("http://localhost:8083/swagger/doc.json")))
 	mux.Handle("/metrics", promhttp.Handler())

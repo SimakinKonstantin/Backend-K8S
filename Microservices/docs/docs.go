@@ -24,6 +24,27 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/health": {
+            "get": {
+                "summary": "Проверка, что все зависимости готовы к использованию",
+                "responses": {
+                    "200": {
+                        "description": "Сервис готов к использованию"
+                    }
+                }
+            }
+        },
+        "/ping": {
+            "get": {
+                "description": "Проверка доступности сервиса",
+                "summary": "Пинг сервера",
+                "responses": {
+                    "200": {
+                        "description": "Сервис доступен"
+                    }
+                }
+            }
+        },
         "/programs": {
             "get": {
                 "description": "Возвращает список программ",
@@ -38,13 +59,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Успешно получены все программы тренировок",
                         "schema": {
-                            "$ref": "#/definitions/main.Program"
+                            "$ref": "#/definitions/models.Program"
                         }
                     },
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -62,7 +83,7 @@ const docTemplate = `{
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -91,19 +112,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Успешно получена программа тренировок",
                         "schema": {
-                            "$ref": "#/definitions/main.Program"
+                            "$ref": "#/definitions/models.Program"
                         }
                     },
                     "404": {
                         "description": "Нет элемента с указанным идентификатором",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -154,19 +175,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Ошибки в передаваемых параметрах",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "405": {
                         "description": "Неверный метод",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -196,25 +217,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Ошибки в передаваемых параметрах",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "404": {
                         "description": "Нет элемента с указанным идентификатором",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "405": {
                         "description": "Неверный метод",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -262,19 +283,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Неверное значение цены",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "404": {
                         "description": "Нет элемента с таким идентификатором",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -300,7 +321,7 @@ const docTemplate = `{
                     "422": {
                         "description": "Неподдерживаемые данные",
                         "schema": {
-                            "$ref": "#/definitions/main.Error"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -308,7 +329,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "main.Error": {
+        "models.Error": {
             "type": "object",
             "properties": {
                 "message": {
@@ -316,7 +337,7 @@ const docTemplate = `{
                 }
             }
         },
-        "main.Program": {
+        "models.Program": {
             "type": "object",
             "properties": {
                 "confirmedby": {
@@ -342,11 +363,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "2.0",
-	Host:             "localhost:8081",
+	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Swagger Example API",
-	Description:      "Симакин К.С. Акчурин А.Р.",
+	Description:      "Сервис программ тренировок",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -24,6 +24,27 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/health": {
+            "get": {
+                "summary": "Проверка, что все зависимости готовы к использованию",
+                "responses": {
+                    "200": {
+                        "description": "Сервис готов к использованию"
+                    }
+                }
+            }
+        },
+        "/ping": {
+            "get": {
+                "description": "Проверка доступности сервиса",
+                "summary": "Пинг сервера",
+                "responses": {
+                    "200": {
+                        "description": "Сервис доступен"
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Возвращает список пользователей",
@@ -367,11 +388,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "2.0",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Swagger Example API",
-	Description:      "Симакин К.С. Акчурин А.Р.",
+	Description:      "Сервис пользователей",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

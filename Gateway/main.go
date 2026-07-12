@@ -13,7 +13,7 @@ import (
 
 // @title Swagger Example API
 // @version 2.0
-// @description Симакин К.С. Акчурин А.Р. Gateway
+// @description Gateway
 // @termsOfService http://swagger.io/terms/
 
 // @contact.name API Support
@@ -23,7 +23,7 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8083
+// @host
 func main() {
 	slog.Info("Gateway started")
 

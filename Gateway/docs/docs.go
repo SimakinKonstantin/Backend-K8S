@@ -507,7 +507,12 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Добавляет в список пользователей нового",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Добавляет пользователя от имени авторизованного пользователя. Для публичной регистрации используйте /register.",
                 "produces": [
                     "application/json"
                 ],
@@ -789,6 +794,77 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/register": {
+            "post": {
+                "description": "Создаёт нового пользователя без JWT. После регистрации получите токен через /login.",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Аутентификация"
+                ],
+                "summary": "Зарегистрировать пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Имя",
+                        "name": "Name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фамилия",
+                        "name": "Surname",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Логин",
+                        "name": "login",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Возраст",
+                        "name": "Age",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Идентификатор созданного пользователя",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибки в передаваемых параметрах",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    },
+                    "405": {
+                        "description": "Неверный метод",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    },
+                    "422": {
+                        "description": "Не удалось создать пользователя",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -850,11 +926,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "2.0",
-	Host:             "localhost:8083",
+	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Swagger Example API",
-	Description:      "Симакин К.С. Акчурин А.Р. Gateway",
+	Description:      "Gateway",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

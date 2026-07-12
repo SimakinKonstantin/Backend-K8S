@@ -1,10 +1,10 @@
 definitions:
-  main.Error:
+  models.Error:
     properties:
       message:
         type: string
     type: object
-  main.Program:
+  models.Program:
     properties:
       confirmedby:
         type: string
@@ -17,13 +17,12 @@ definitions:
       wasconfirmed:
         type: string
     type: object
-host: localhost:8081
 info:
   contact:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: Симакин К.С. Акчурин А.Р.
+  description: Сервис программ тренировок
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -31,6 +30,19 @@ info:
   title: Swagger Example API
   version: "2.0"
 paths:
+  /health:
+    get:
+      responses:
+        "200":
+          description: Сервис готов к использованию
+      summary: Проверка, что все зависимости готовы к использованию
+  /ping:
+    get:
+      description: Проверка доступности сервиса
+      responses:
+        "200":
+          description: Сервис доступен
+      summary: Пинг сервера
   /programs:
     delete:
       description: Удаляет все программы тренировок из списка
@@ -40,7 +52,7 @@ paths:
         "422":
           description: Неподдерживаемые данные
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
       summary: Удалить все программы тренировок
       tags:
       - Программы тренировок
@@ -52,11 +64,11 @@ paths:
         "200":
           description: Успешно получены все программы тренировок
           schema:
-            $ref: '#/definitions/main.Program'
+            $ref: '#/definitions/models.Program'
         "422":
           description: Неподдерживаемые данные
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
       summary: Получить все программы тренировок
       tags:
       - Программы тренировок
@@ -77,19 +89,19 @@ paths:
         "400":
           description: Ошибки в передаваемых параметрах
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
         "404":
           description: Нет элемента с указанным идентификатором
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
         "405":
           description: Неверный метод
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
         "422":
           description: Неподдерживаемые данные
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
       summary: Удалить программу тренировок
       tags:
       - Программы тренировок
@@ -107,15 +119,15 @@ paths:
         "200":
           description: Успешно получена программа тренировок
           schema:
-            $ref: '#/definitions/main.Program'
+            $ref: '#/definitions/models.Program'
         "404":
           description: Нет элемента с указанным идентификатором
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
         "422":
           description: Неподдерживаемые данные
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
       summary: Получить программу тренировок
       tags:
       - Программы тренировок
@@ -147,15 +159,15 @@ paths:
         "400":
           description: Неверное значение цены
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
         "404":
           description: Нет элемента с таким идентификатором
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
         "422":
           description: Неподдерживаемые данные
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
       summary: Обновить программу тренировок
       tags:
       - Программы тренировок
@@ -190,15 +202,15 @@ paths:
         "400":
           description: Ошибки в передаваемых параметрах
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
         "405":
           description: Неверный метод
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
         "422":
           description: Неподдерживаемые данные
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
       summary: Добавить новую программу тренировок
       tags:
       - Программы тренировок
@@ -215,7 +227,7 @@ paths:
         "422":
           description: Неподдерживаемые данные
           schema:
-            $ref: '#/definitions/main.Error'
+            $ref: '#/definitions/models.Error'
       summary: Получить кол-во программ
       tags:
       - Программы тренировок

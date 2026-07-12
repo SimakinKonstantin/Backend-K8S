@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: users-service-container
-          image: konst26/user-service:2
+          image: konst26/user-service:4
           env:
             - name: MONGO_URL
               value: "mongodb://mongodb:27017"

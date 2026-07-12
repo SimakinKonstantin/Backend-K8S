@@ -31,8 +31,8 @@ type App struct {
 // @Description    Возвращает список программ
 // @Tags 		   Программы тренировок
 // @Produce        json
-// @Success        200 {object} Program  "Успешно получены все программы тренировок"
-// @Failure        422 {object} Error "Неподдерживаемые данные"
+// @Success        200 {object} models.Program  "Успешно получены все программы тренировок"
+// @Failure        422 {object} models.Error "Неподдерживаемые данные"
 // @Router         /programs [get]
 func (app *App) ShowAllHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
@@ -62,9 +62,9 @@ func (app *App) ShowAllHandler(w http.ResponseWriter, r *http.Request) {
 // @Tags 		   Программы тренировок
 // @Produce        json
 // @Param          id   query  string  true  "Идентификатор программы"
-// @Success        200 {object} Program  "Успешно получена программа тренировок"
-// @Failure        404 {object} Error "Нет элемента с указанным идентификатором"
-// @Failure        422 {object} Error "Неподдерживаемые данные
+// @Success        200 {object} models.Program  "Успешно получена программа тренировок"
+// @Failure        404 {object} models.Error "Нет элемента с указанным идентификатором"
+// @Failure        422 {object} models.Error "Неподдерживаемые данные
 // @Router         /programs/ [get]
 func (app *App) ShowHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
@@ -131,9 +131,9 @@ func (app *App) ShowHandler(w http.ResponseWriter, r *http.Request) {
 // @Param		   Description formData string false "Описание программы"
 // @Param		   Price formData int false "Стоимость программы"
 // @Success        200 "Успешно обновлена"
-// @Failure        400 {object} Error "Неверное значение цены"
-// @Failure        404 {object} Error "Нет элемента с таким идентификатором"
-// @Failure        422 {object} Error "Неподдерживаемые данные"
+// @Failure        400 {object} models.Error "Неверное значение цены"
+// @Failure        404 {object} models.Error "Нет элемента с таким идентификатором"
+// @Failure        422 {object} models.Error "Неподдерживаемые данные"
 // @Router         /programs/ [patch]
 func (app *App) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
@@ -224,9 +224,9 @@ func (app *App) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 // @Param		   ConfirmUserId formData string true "Id подтверждающего пользователя"
 // @Produce        json
 // @Success        200 "Успешно добавлена"
-// @Failure        400 {object} Error "Ошибки в передаваемых параметрах"
-// @Failure        405 {object} Error "Неверный метод"
-// @Failure        422 {object} Error "Неподдерживаемые данные"
+// @Failure        400 {object} models.Error "Ошибки в передаваемых параметрах"
+// @Failure        405 {object} models.Error "Неверный метод"
+// @Failure        422 {object} models.Error "Неподдерживаемые данные"
 // @Router         /programs/ [post]
 func (app *App) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
@@ -315,10 +315,10 @@ func (app *App) CreateHandler(w http.ResponseWriter, r *http.Request) {
 // @Param          id   query  string  true  "Идентификатор удаляемой программы"
 // @Produce        json
 // @Success        200 "Успешно удалена"
-// @Failure        400 {object} Error "Ошибки в передаваемых параметрах"
-// @Failure        404 {object} Error "Нет элемента с указанным идентификатором"
-// @Failure        405 {object} Error "Неверный метод"
-// @Failure        422 {object} Error "Неподдерживаемые данные"
+// @Failure        400 {object} models.Error "Ошибки в передаваемых параметрах"
+// @Failure        404 {object} models.Error "Нет элемента с указанным идентификатором"
+// @Failure        405 {object} models.Error "Неверный метод"
+// @Failure        422 {object} models.Error "Неподдерживаемые данные"
 // @Router         /programs/ [delete]
 func (app *App) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
@@ -367,7 +367,7 @@ func (app *App) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 // @Description    Удаляет все программы тренировок из списка
 // @Tags 		   Программы тренировок
 // @Success        200 "Успешно удалены"
-// @Failure        422 {object} Error "Неподдерживаемые данные"
+// @Failure        422 {object} models.Error "Неподдерживаемые данные"
 // @Router         /programs [delete]
 func (app *App) DeleteAllHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
@@ -394,7 +394,7 @@ func (app *App) DeleteAllHandler(w http.ResponseWriter, r *http.Request) {
 // @Tags 		   Программы тренировок
 // @Produce        text/plain
 // @Success        200 {integer} int "Кол-во элементов"
-// @Failure        422 {object} Error "Неподдерживаемые данные"
+// @Failure        422 {object} models.Error "Неподдерживаемые данные"
 // @Router         /programs/count [get]
 func (app *App) GetCount(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()

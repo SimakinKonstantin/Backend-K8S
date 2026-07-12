@@ -3,8 +3,8 @@
 Предметная область - программы спортивных тренировок.
 
 ## Функциональные требования
-* Функционал управления программи тренировок;
-* Функционал управления пользователями;
+* Функционал управления программами тренировок;
+* Функционал управления пользователями.
 
 ## Нефункциональные требования
 * Развертывание с помощью kubernetes;
@@ -14,7 +14,7 @@
 ## Архитектура проекта
 - **Gateway** - точка входа. Проксирует запросы к внутренним сервисам, выдаёт и проверяет JWT;
 - **Сервис программ тренировок** - управляет программами тренировок. Предоставляет REST API, GraphQL API;
-- **Сервис пользователей** — управляет пользователями приложения.
+- **Сервис пользователей** - управляет пользователями приложения.
 
 ## Технологии
 
@@ -29,15 +29,14 @@
 
 ### GraphQL
 GraphQL предоставляет API сервиса программ тренировок в дополнение к HTTP. Реализует запросы:
-* `allPrograms`;
-* `program`; 
-* `programsCount`;
-* `programFilter`.
-Также реализованы мутации:
-* `updateProgram`;
-* `addProgram`;
-* `deleteProgram`;
-* `deleteAllPrograms`.
+* `allPrograms` (query);
+* `program` (query); 
+* `programsCount` (query);
+* `programFilter` (query);
+* `updateProgram` (мутация);
+* `addProgram` (мутация);
+* `deleteProgram` (мутация);
+* `deleteAllPrograms` (мутация).
 
 Запросы можно отправлять через GraphQL Playground на порту 8010.
 
@@ -60,5 +59,18 @@ JWT применяется в Gateway для аутентификации зап
 1. Запустить minikube: `minikube start`;
 2. Применить манифесты: `kubectl apply -f .\manifests\ --recursive`;
 3. Убедиться, что все поды готовы к использованию: `kubectl get pods`;
-4. Хотя здесь настроен ingress из-за особенностей minikube может понадобиться пробросить наружу порты: `kubectl port-forward service/gateway 8083:8083`;
+4. Хотя здесь настроен ingress, из-за особенностей minikube может понадобиться пробросить наружу порты: `kubectl port-forward service/gateway 8083:8083`;
 5. Перейти на `http://localhost:8083/swagger/index.html`.
+
+## Скриншоты
+<img width="672" height="345" alt="image" src="https://github.com/user-attachments/assets/71b47148-a601-416b-a806-1e3a0314163f" />
+<p align="center"><strong>Поды готового приложения</strong></p><br>
+
+<img width="902" height="733" alt="image" src="https://github.com/user-attachments/assets/636177f7-db35-4157-b78f-b53896fd5d8f" />
+<p align="center"><strong>Swagger документация</strong></p><br>
+
+<img width="1203" height="724" alt="image" src="https://github.com/user-attachments/assets/c8acfb73-fe30-4dd3-9631-f434694cbf21" />
+<p align="center"><strong>Пример выполненного HTTP-запроса</strong></p><br>
+
+<img width="1920" height="495" alt="image" src="https://github.com/user-attachments/assets/52377ee1-5589-4aee-a074-ec28c98b06b7" />
+<p align="center"><strong>Пример выполненного GraphQL-запроса для получения только нужных клиенту полей</strong></p><br>

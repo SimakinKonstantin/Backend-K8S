@@ -1,0 +1,337 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+data:
+  gateway-service.json: |
+    {
+      "annotations": {"list": []},
+      "description": "Доступность, память и ошибки Gateway по метрикам самого Go-процесса.",
+      "editable": false,
+      "graphTooltip": 1,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "description": "1 - Gateway доступен, 0 - Gateway недоступен.",
+          "fieldConfig": {
+            "defaults": {"color": {"mode": "palette-classic"}, "decimals": 0, "min": 0, "unit": "short"},
+            "overrides": []
+          },
+          "gridPos": {"h": 9, "w": 12, "x": 0, "y": 0},
+          "id": 1,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "sum"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+            "tooltip": {"mode": "multi", "sort": "desc"}
+          },
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "max(up{job=\"prometheus-gateway\"})",
+              "legendFormat": "Gateway",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Доступность Gateway",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "description": "Оперативная память, используемая процессом Gateway.",
+          "fieldConfig": {
+            "defaults": {"color": {"mode": "palette-classic"}, "decimals": 1, "min": 0, "unit": "bytes"},
+            "overrides": []
+          },
+          "gridPos": {"h": 9, "w": 12, "x": 12, "y": 0},
+          "id": 2,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+            "tooltip": {"mode": "single", "sort": "none"}
+          },
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum(process_resident_memory_bytes{job=\"prometheus-gateway\"})",
+              "legendFormat": "Память",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Использование памяти",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "description": "Накопительное количество ошибок, зарегистрированных Gateway.",
+          "fieldConfig": {
+            "defaults": {"color": {"fixedColor": "red", "mode": "fixed"}, "decimals": 0, "min": 0, "unit": "short"},
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 9},
+          "id": 3,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "sum"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+            "tooltip": {"mode": "single", "sort": "none"}
+          },
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum(gateway_error)",
+              "legendFormat": "Ошибки",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Количество ошибок сервиса",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "15s",
+      "schemaVersion": 39,
+      "tags": ["gateway", "runtime", "prometheus"],
+      "templating": {"list": []},
+      "time": {"from": "now-1h", "to": "now"},
+      "timezone": "browser",
+      "title": "Gateway - метрики сервиса",
+      "uid": "gateway-service",
+      "version": 1
+    }
+  programs-service.json: |
+    {
+      "annotations": {"list": []},
+      "description": "HTTP- и GraphQL-метрики сервиса программ тренировок.",
+      "editable": false,
+      "graphTooltip": 1,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "description": "Накопительное количество REST-запросов, сгруппированное по HTTP-коду.",
+          "fieldConfig": {
+            "defaults": {"color": {"mode": "palette-classic"}, "decimals": 0, "min": 0, "unit": "short"},
+            "overrides": []
+          },
+          "gridPos": {"h": 9, "w": 12, "x": 0, "y": 0},
+          "id": 1,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "sum"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+            "tooltip": {"mode": "multi", "sort": "desc"}
+          },
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum by (status) (microservice_request_count)",
+              "legendFormat": "HTTP {{status}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Количество запросов по кодам ответа",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "description": "Суммарное время всех REST-ответов, делённое на количество REST-запросов.",
+          "fieldConfig": {
+            "defaults": {"color": {"mode": "palette-classic"}, "decimals": 3, "min": 0, "unit": "s"},
+            "overrides": []
+          },
+          "gridPos": {"h": 9, "w": 12, "x": 12, "y": 0},
+          "id": 2,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+            "tooltip": {"mode": "single", "sort": "none"}
+          },
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum(microservice_request_sum) / clamp_min(sum(microservice_request_count), 1) or vector(0)",
+              "legendFormat": "Среднее время ответа",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Среднее время ответа",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "description": "Накопительное количество ошибок, зарегистрированных сервисом программ.",
+          "fieldConfig": {
+            "defaults": {"color": {"fixedColor": "red", "mode": "fixed"}, "decimals": 0, "min": 0, "unit": "short"},
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 9},
+          "id": 3,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "sum"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+            "tooltip": {"mode": "single", "sort": "none"}
+          },
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum(microservice_error)",
+              "legendFormat": "Ошибки",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Количество ошибок сервиса",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "description": "Накопительное количество GraphQL-операций, отдельно для успешных выполнений и ошибок.",
+          "fieldConfig": {
+            "defaults": {"color": {"mode": "palette-classic"}, "decimals": 0, "min": 0, "unit": "short"},
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 17},
+          "id": 4,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "sum"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+            "tooltip": {"mode": "multi", "sort": "desc"}
+          },
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum by (status) (microservice_gql_count) or label_replace(vector(0), \"status\", \"нет запросов\", \"__name__\", \".*\")",
+              "legendFormat": "GraphQL {{status}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "GraphQL-запросы по результату",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "description": "Суммарное время всех GraphQL-операций, делённое на их количество.",
+          "fieldConfig": {
+            "defaults": {"color": {"mode": "palette-classic"}, "decimals": 3, "min": 0, "unit": "s"},
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 17},
+          "id": 5,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+            "tooltip": {"mode": "single", "sort": "none"}
+          },
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum(microservice_gql_sum) / clamp_min(sum(microservice_gql_count), 1) or vector(0)",
+              "legendFormat": "Среднее время GraphQL",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Среднее время GraphQL-ответа",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "15s",
+      "schemaVersion": 39,
+      "tags": ["programs-service", "http", "graphql", "prometheus"],
+      "templating": {"list": []},
+      "time": {"from": "now-1h", "to": "now"},
+      "timezone": "browser",
+      "title": "Programs service - метрики сервиса",
+      "uid": "programs-service",
+      "version": 1
+    }
+  users-service.json: |
+    {
+      "annotations": {"list": []},
+      "description": "HTTP-метрики сервиса пользователей.",
+      "editable": false,
+      "graphTooltip": 1,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "description": "Накопительное количество запросов, сгруппированное по HTTP-коду.",
+          "fieldConfig": {
+            "defaults": {"color": {"mode": "palette-classic"}, "decimals": 0, "min": 0, "unit": "short"},
+            "overrides": []
+          },
+          "gridPos": {"h": 9, "w": 12, "x": 0, "y": 0},
+          "id": 1,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "sum"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+            "tooltip": {"mode": "multi", "sort": "desc"}
+          },
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum by (status) (userservice_request_count)",
+              "legendFormat": "HTTP {{status}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Количество запросов по кодам ответа",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "description": "Суммарное время всех ответов, делённое на количество запросов.",
+          "fieldConfig": {
+            "defaults": {"color": {"mode": "palette-classic"}, "decimals": 3, "min": 0, "unit": "s"},
+            "overrides": []
+          },
+          "gridPos": {"h": 9, "w": 12, "x": 12, "y": 0},
+          "id": 2,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+            "tooltip": {"mode": "single", "sort": "none"}
+          },
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum(userservice_request_sum) / clamp_min(sum(userservice_request_count), 1) or vector(0)",
+              "legendFormat": "Среднее время ответа",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Среднее время ответа",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "description": "Накопительное количество ошибок, зарегистрированных сервисом пользователей.",
+          "fieldConfig": {
+            "defaults": {"color": {"fixedColor": "red", "mode": "fixed"}, "decimals": 0, "min": 0, "unit": "short"},
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 9},
+          "id": 3,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "sum"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+            "tooltip": {"mode": "single", "sort": "none"}
+          },
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum(userservice_error)",
+              "legendFormat": "Ошибки",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Количество ошибок сервиса",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "15s",
+      "schemaVersion": 39,
+      "tags": ["users-service", "http", "prometheus"],
+      "templating": {"list": []},
+      "time": {"from": "now-1h", "to": "now"},
+      "timezone": "browser",
+      "title": "Users service - метрики сервиса",
+      "uid": "users-service",
+      "version": 1
+    }

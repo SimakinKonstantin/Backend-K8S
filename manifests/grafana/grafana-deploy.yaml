@@ -20,8 +20,28 @@ spec:
             value: "admin"
         volumeMounts:
           - name: grafana-storage
-            mountPath: /var/lib/grafana # По этому пути ихнутри контейнера можно будет обратиться к данным PV.
+            mountPath: /var/lib/grafana
+          - name: grafana-provisioning
+            mountPath: /etc/grafana/provisioning/datasources/datasource.yaml
+            subPath: datasource.yaml
+            readOnly: true
+          - name: grafana-dashboard-provider
+            mountPath: /etc/grafana/provisioning/dashboards/dashboard-provider.yaml
+            subPath: dashboard-provider.yaml
+            readOnly: true
+          - name: grafana-dashboards
+            mountPath: /var/lib/grafana/dashboards
+            readOnly: true
       volumes:
         - name: grafana-storage
           persistentVolumeClaim:
             claimName: grafana-pv-claim
+        - name: grafana-provisioning
+          configMap:
+            name: grafana-datasource
+        - name: grafana-dashboard-provider
+          configMap:
+            name: grafana-dashboard-provider
+        - name: grafana-dashboards
+          configMap:
+            name: grafana-dashboards

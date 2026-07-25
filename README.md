@@ -74,3 +74,15 @@ JWT применяется в Gateway для аутентификации зап
 
 <img width="1920" height="495" alt="image" src="https://github.com/user-attachments/assets/52377ee1-5589-4aee-a074-ec28c98b06b7" />
 <p align="center"><strong>Пример выполненного GraphQL-запроса для получения только нужных клиенту полей</strong></p><br>
+
+<img width="1008" height="396" alt="image" src="https://github.com/user-attachments/assets/852a552d-7f13-4e43-9749-de7649ef21cd" />
+<p align="center"><strong>Автоматические настроенные через манифесты K8S дашборды</strong></p><br>
+
+<img width="1919" height="879" alt="image" src="https://github.com/user-attachments/assets/c80731ab-de5b-497b-a194-a1e3d50e76cd" />
+<p align="center"><strong>Дашборд метрик сервиса пользователей</strong></p><br>
+
+<img width="1920" height="637" alt="image" src="https://github.com/user-attachments/assets/cd33806f-1bd0-43bf-817e-f3241d245592" />
+<p align="center"><strong>Дашборд метрик Gateway сервиса</strong></p><br>
+
+<img width="1920" height="873" alt="image" src="https://github.com/user-attachments/assets/c3f2df2b-d673-476a-b0c0-57299032daf5" />
+<p align="center"><strong>Дашборд метрик сервиса программ тренировок</strong></p><br>

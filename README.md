@@ -62,7 +62,7 @@ JWT применяется в Gateway для аутентификации зап
 4. Хотя здесь настроен ingress, из-за особенностей minikube может понадобиться пробросить наружу порты: `kubectl port-forward service/gateway 8083:8083`;
 5. Перейти на `http://localhost:8083/swagger/index.html`;
 6. Чтобы просмотреть дашборды нужно пробросить порты до Grafana `kubectl port-forward service/grafana 3000:3000`;
-7. Перейти на `http://localhost:3000`, в качестве кредов для входа использовать `admin` `admin`
+7. Перейти на `http://localhost:3000`. Логин и пароль для входа - `admin`.
 
 ## Скриншоты
 <img width="672" height="345" alt="image" src="https://github.com/user-attachments/assets/71b47148-a601-416b-a806-1e3a0314163f" />
